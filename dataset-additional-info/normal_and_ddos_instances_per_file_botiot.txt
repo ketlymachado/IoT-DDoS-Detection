@@ -1,0 +1,375 @@
+
+
+
+
+Total normal instances from file 1 = 1993
+Total DDoS attack instances from file 1 = 0
+
+
+
+Total normal instances from file 2 = 4941
+Total DDoS attack instances from file 2 = 0
+
+
+
+Total normal instances from file 3 = 107
+Total DDoS attack instances from file 3 = 0
+
+
+
+Total normal instances from file 4 = 98
+Total DDoS attack instances from file 4 = 0
+
+
+
+Total normal instances from file 5 = 76
+Total DDoS attack instances from file 5 = 0
+
+
+
+Total normal instances from file 6 = 33
+Total DDoS attack instances from file 6 = 0
+
+
+
+Total normal instances from file 7 = 41
+Total DDoS attack instances from file 7 = 0
+
+
+
+Total normal instances from file 8 = 27
+Total DDoS attack instances from file 8 = 0
+
+
+
+Total normal instances from file 9 = 38
+Total DDoS attack instances from file 9 = 0
+
+
+
+Total normal instances from file 10 = 30
+Total DDoS attack instances from file 10 = 0
+
+
+
+Total normal instances from file 11 = 40
+Total DDoS attack instances from file 11 = 0
+
+
+
+Total normal instances from file 12 = 27
+Total DDoS attack instances from file 12 = 0
+
+
+
+Total normal instances from file 13 = 32
+Total DDoS attack instances from file 13 = 0
+
+
+
+Total normal instances from file 14 = 37
+Total DDoS attack instances from file 14 = 0
+
+
+
+Total normal instances from file 15 = 50
+Total DDoS attack instances from file 15 = 0
+
+
+
+Total normal instances from file 16 = 28
+Total DDoS attack instances from file 16 = 0
+
+
+
+Total normal instances from file 17 = 35
+Total DDoS attack instances from file 17 = 0
+
+
+
+Total normal instances from file 18 = 31
+Total DDoS attack instances from file 18 = 0
+
+
+
+Total normal instances from file 19 = 34
+Total DDoS attack instances from file 19 = 0
+
+
+
+Total normal instances from file 20 = 24
+Total DDoS attack instances from file 20 = 0
+
+
+
+Total normal instances from file 21 = 35
+Total DDoS attack instances from file 21 = 0
+
+
+
+Total normal instances from file 22 = 45
+Total DDoS attack instances from file 22 = 0
+
+
+
+Total normal instances from file 23 = 38
+Total DDoS attack instances from file 23 = 0
+
+
+
+Total normal instances from file 24 = 35
+Total DDoS attack instances from file 24 = 0
+
+
+
+Total normal instances from file 25 = 36
+Total DDoS attack instances from file 25 = 0
+
+
+
+Total normal instances from file 26 = 24
+Total DDoS attack instances from file 26 = 0
+
+
+
+Total normal instances from file 27 = 38
+Total DDoS attack instances from file 27 = 0
+
+
+
+Total normal instances from file 28 = 26
+Total DDoS attack instances from file 28 = 0
+
+
+
+Total normal instances from file 29 = 32
+Total DDoS attack instances from file 29 = 0
+
+
+
+Total normal instances from file 30 = 36
+Total DDoS attack instances from file 30 = 0
+
+
+
+Total normal instances from file 31 = 25
+Total DDoS attack instances from file 31 = 0
+
+
+
+Total normal instances from file 32 = 36
+Total DDoS attack instances from file 32 = 0
+
+
+
+Total normal instances from file 33 = 27
+Total DDoS attack instances from file 33 = 0
+
+
+
+Total normal instances from file 34 = 32
+Total DDoS attack instances from file 34 = 0
+
+
+
+Total normal instances from file 35 = 102
+Total DDoS attack instances from file 35 = 163291
+
+
+
+Total normal instances from file 36 = 31
+Total DDoS attack instances from file 36 = 999969
+
+
+
+Total normal instances from file 37 = 34
+Total DDoS attack instances from file 37 = 999966
+
+
+
+Total normal instances from file 38 = 29
+Total DDoS attack instances from file 38 = 999971
+
+
+
+Total normal instances from file 39 = 34
+Total DDoS attack instances from file 39 = 999966
+
+
+
+Total normal instances from file 40 = 35
+Total DDoS attack instances from file 40 = 999965
+
+
+
+Total normal instances from file 41 = 31
+Total DDoS attack instances from file 41 = 999969
+
+
+
+Total normal instances from file 42 = 27
+Total DDoS attack instances from file 42 = 999973
+
+
+
+Total normal instances from file 43 = 33
+Total DDoS attack instances from file 43 = 999967
+
+
+
+Total normal instances from file 44 = 39
+Total DDoS attack instances from file 44 = 999961
+
+
+
+Total normal instances from file 45 = 33
+Total DDoS attack instances from file 45 = 999967
+
+
+
+Total normal instances from file 46 = 31
+Total DDoS attack instances from file 46 = 999969
+
+
+
+Total normal instances from file 47 = 36
+Total DDoS attack instances from file 47 = 999964
+
+
+
+Total normal instances from file 48 = 25
+Total DDoS attack instances from file 48 = 999975
+
+
+
+Total normal instances from file 49 = 41
+Total DDoS attack instances from file 49 = 999959
+
+
+
+Total normal instances from file 50 = 30
+Total DDoS attack instances from file 50 = 999970
+
+
+
+Total normal instances from file 51 = 33
+Total DDoS attack instances from file 51 = 999967
+
+
+
+Total normal instances from file 52 = 26
+Total DDoS attack instances from file 52 = 999974
+
+
+
+Total normal instances from file 53 = 34
+Total DDoS attack instances from file 53 = 999966
+
+
+
+Total normal instances from file 54 = 33
+Total DDoS attack instances from file 54 = 999967
+
+
+
+Total normal instances from file 55 = 36
+Total DDoS attack instances from file 55 = 999964
+
+
+
+Total normal instances from file 56 = 32
+Total DDoS attack instances from file 56 = 999968
+
+
+
+Total normal instances from file 57 = 24
+Total DDoS attack instances from file 57 = 999976
+
+
+
+Total normal instances from file 58 = 33
+Total DDoS attack instances from file 58 = 999967
+
+
+
+Total normal instances from file 59 = 34
+Total DDoS attack instances from file 59 = 999966
+
+
+
+Total normal instances from file 60 = 33
+Total DDoS attack instances from file 60 = 999967
+
+
+
+Total normal instances from file 61 = 32
+Total DDoS attack instances from file 61 = 999968
+
+
+
+Total normal instances from file 62 = 28
+Total DDoS attack instances from file 62 = 999972
+
+
+
+Total normal instances from file 63 = 31
+Total DDoS attack instances from file 63 = 999969
+
+
+
+Total normal instances from file 64 = 26
+Total DDoS attack instances from file 64 = 999974
+
+
+
+Total normal instances from file 65 = 35
+Total DDoS attack instances from file 65 = 999965
+
+
+
+Total normal instances from file 66 = 47
+Total DDoS attack instances from file 66 = 999953
+
+
+
+Total normal instances from file 67 = 39
+Total DDoS attack instances from file 67 = 999961
+
+
+
+Total normal instances from file 68 = 28
+Total DDoS attack instances from file 68 = 999972
+
+
+
+Total normal instances from file 69 = 38
+Total DDoS attack instances from file 69 = 999962
+
+
+
+Total normal instances from file 70 = 29
+Total DDoS attack instances from file 70 = 999971
+
+
+
+Total normal instances from file 71 = 28
+Total DDoS attack instances from file 71 = 999972
+
+
+
+Total normal instances from file 72 = 33
+Total DDoS attack instances from file 72 = 999967
+
+
+
+Total normal instances from file 73 = 34
+Total DDoS attack instances from file 73 = 999966
+
+
+
+Total normal instances from file 74 = 19
+Total DDoS attack instances from file 74 = 370424
+
+
+Total normal instances = 9543
+Total DDoS attack instances = 38532480
