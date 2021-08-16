@@ -1,0 +1,13 @@
+# Hoeffding Tree
+java -cp moa.jar -javaagent:sizeofag-1.0.4.jar moa.DoTask "EvaluatePrequential -l trees.HoeffdingTree -s (ArffFileStream -f ../../processed-data/botiot-1.arff) -e (WindowClassificationPerformanceEvaluator -o -p -r -f) -i -1 -f 1000 -q 1000" > ../../moa-results/15-08/Hoeffding-Tree/ht-1
+
+# Naive Bayes
+java -cp moa.jar -javaagent:sizeofag-1.0.4.jar moa.DoTask "EvaluatePrequential -l bayes.NaiveBayes -s (ArffFileStream -f ../../processed-data/botiot-1.arff) -e (WindowClassificationPerformanceEvaluator -o -p -r -f) -i -1 -f 1000 -q 1000" > ../../moa-results/15-08/NaiveBayes/nb-1.csv
+
+# kNN
+
+java -cp moa.jar -javaagent:sizeofag-1.0.4.jar moa.DoTask all-1.1.2.pom OA "EvaluatePrequential -l lazy.kNN -s (ArffFileStream -f ../../processed-data/botiot-1.arff) -e (WindowClassificationPerformanceEvaluator -o -p -r -f) -i -1 -f 1000 -q 1000" > ../../moa-results/15-08/kNN/kNN-1.csv
+
+# OzaBag
+
+java -cp moa.jar -javaagent:sizeofag-1.0.4.jar moa.DoTask "EvaluateInterleavedTestThenTrain -l meta.OzaBag -s (ArffFileStream -f ../../processed-data/botiot-1.arff) -e (WindowClassificationPerformanceEvaluator -o -p -r -f) -i -1 -f 1000 -q 1000" > ../../moa-results/15-08/OzaBag/ob-1.csv
