@@ -55,16 +55,17 @@ with open("../processed-data/botiot-" + args.p + ".csv", "a", newline="") as bot
             for row in csv_reader:
                 # We consider the instance only if it is either normal or DDoS attack traffic
                 # 08/30 Test - Considering reconnaissance attacks as normal traffic
-                if row[33] == "Normal" or row[33] == "Reconnaissance" or (row[33] == "DDoS" and row[34] != "HTTP"):
-                    if row[33] == "Reconnaissance":
-                        row[32] = "0"
-                    if row[33] == "Normal" or row[33] == "Reconnaissance":
+                #if row[33] == "Normal" or row[33] == "Reconnaissance" or (row[33] == "DDoS" and row[34] != "HTTP"):
+                if row[33] == "Normal" or (row[33] == "DDoS" and row[34] != "HTTP"):
+                    #if row[33] == "Reconnaissance":
+                        #row[32] = "0"
+                    if row[33] == "Normal": #or row[33] == "Reconnaissance":
                         spamwriter.writerow(row)
                         count_normal = count_normal + 1
                     else:
                         x = random.random()
                         # Randomly chooses to include or not the attack instance based on the chosen percentage
-                        if x < (int(args.p) / 100.00):
+                        if x < (float(args.p) / 100.00):
                             spamwriter.writerow(row)
                             count_ddos = count_ddos + 1
                     
