@@ -1,0 +1,19 @@
+# Hoeffding Tree
+java -cp moa.jar -javaagent:sizeofag-1.0.4.jar moa.DoTask "EvaluatePrequential -l trees.HoeffdingTree -s (ArffFileStream -f ../../processed-data/botiot-1.arff) -e (BasicClassificationPerformanceEvaluator -o -p -r -f) -i -1 -f 1000 -q 1000" > ../../moa-results/30-08/Hoeffding-Tree/ht-1.csv
+
+# Naive Bayes
+java -cp moa.jar -javaagent:sizeofag-1.0.4.jar moa.DoTask "EvaluatePrequential -l bayes.NaiveBayes -s (ArffFileStream -f ../../processed-data/botiot-1.arff) -e (BasicClassificationPerformanceEvaluator -o -p -r -f) -i -1 -f 1000 -q 1000" > ../../moa-results/30-08/NaiveBayes/nb-1.csv
+
+# kNN
+java -cp moa.jar -javaagent:sizeofag-1.0.4.jar moa.DoTask "EvaluatePrequential -l lazy.kNN -s (ArffFileStream -f ../../processed-data/botiot-1.arff) -e (BasicClassificationPerformanceEvaluator -o -p -r -f) -i -1 -f 1000 -q 1000" > ../../moa-results/30-08/kNN/kNN-1.csv
+
+# OzaBag
+java -cp moa.jar -javaagent:sizeofag-1.0.4.jar moa.DoTask "EvaluateInterleavedTestThenTrain -l meta.OzaBag -s (ArffFileStream -f ../../processed-data/botiot-1.arff) -e (BasicClassificationPerformanceEvaluator -o -p -r -f) -i -1 -f 1000 -q 1000" > ../../moa-results/30-08/OzaBag/ob-1.csv
+
+# LeveragingBag
+java -cp moa.jar -javaagent:sizeofag-1.0.4.jar moa.DoTask "EvaluateInterleavedTestThenTrain -l (meta.LeveragingBag -l (trees.HoeffdingTree -l NB)) -s (ArffFileStream -f ../../processed-data/botiot-1.arff) -e (WindowClassificationPerformanceEvaluator -o -p -r -f) -i -1 -f 5000 -q 5000" > ../../moa-results/30-08/LeveragingBag/lb-1.csv
+java -cp moa.jar -javaagent:sizeofag-1.0.4.jar moa.DoTask "EvaluateInterleavedTestThenTrain -l (meta.LeveragingBag -l (trees.HoeffdingTree -l NB)) -s (ArffFileStream -f ../../processed-data/botiot-5.arff) -e (WindowClassificationPerformanceEvaluator -o -p -r -f) -i -1 -f 5000 -q 5000" > ../../moa-results/30-08/LeveragingBag/lb-2.csv
+java -cp moa.jar -javaagent:sizeofag-1.0.4.jar moa.DoTask "EvaluateInterleavedTestThenTrain -l (meta.LeveragingBag -l (trees.HoeffdingTree -l NB)) -s (ArffFileStream -f ../../processed-data/OLD/30-08/botiot-1.arff) -e (BasicClassificationPerformanceEvaluator -o -p -r -f) -i -1 -f 5000 -q 5000" > ../../moa-results/30-08/LeveragingBag/lb-3.csv
+java -cp moa.jar -javaagent:sizeofag-1.0.4.jar moa.DoTask "EvaluateInterleavedTestThenTrain -l (meta.LeveragingBag -l (trees.HoeffdingTree -l NB)) -s (ArffFileStream -f ../../processed-data/botiot-5.arff) -e (BasicClassificationPerformanceEvaluator -o -p -r -f) -i -1 -f 5000 -q 5000" > ../../moa-results/30-08/LeveragingBag/lb-4.csv
+java -cp moa.jar -javaagent:sizeofag-1.0.4.jar moa.DoTask "EvaluateInterleavedTestThenTrain -l (meta.LeveragingBag -l (trees.HoeffdingTree -l NB)) -s (ArffFileStream -f ../../processed-data/botiot-5-shuffled.arff) -e (BasicClassificationPerformanceEvaluator -o -p -r -f) -i -1 -f 5000 -q 5000" > ../../moa-results/30-08/LeveragingBag/lb-5.csv
+java -cp moa.jar -javaagent:sizeofag-1.0.4.jar moa.DoTask "EvaluateInterleavedTestThenTrain -l (meta.LeveragingBag -l (trees.HoeffdingTree -l NB)) -s (ArffFileStream -f ../../processed-data/botiot-5-shuffled.arff) -e (WindowClassificationPerformanceEvaluator -o -p -r -f) -i -1 -f 5000 -q 5000" > ../../moa-results/30-08/LeveragingBag/lb-6.csv
