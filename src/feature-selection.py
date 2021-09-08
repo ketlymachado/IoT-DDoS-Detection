@@ -38,7 +38,7 @@ data = data.drop(["pkSeqID", "stime", "flgs", "saddr", "daddr", "seq", "dur", "s
                     "soui", "doui", "sco", "dco", "category", "subcategory"], axis=1)
 
 # Drops instances with NaN values on features sport and dport and alters its data type
-data = data.dropna(subset=["sport", "dport"])
+data = data.dropna(axis = 0)
 data["sport"] = pd.to_numeric(data["sport"], errors="coerce")
 data["dport"] = pd.to_numeric(data["dport"], errors="coerce")
 
@@ -54,4 +54,20 @@ label = data["attack"]
 data = data.drop(["attack"], axis=1)
 data = pd.concat([data, label], axis=1)
 
-data.to_csv(args.f[0:-4] + "-fs" + ".csv", index = False)
+# Drops features after correlation analysis
+#data = data.drop(["sport", "dport", "mean", "min", "max", "rate", "srate", "icmp", "ipv6-icmp",
+#                  "tcp", "udp", "ACC", "INT", "NRS", "REQ", "RST", "URP"], axis=1)
+data = data[["ltime", "attack"]]
+
+#data.to_csv(args.f[0:-4] + "-fs" + ".csv", index = False)
+#data = data.sample(frac=1)
+data.to_csv(args.f[0:-4] + "-eefs" + ".csv", index = False)
+
+ni = len(data[data["attack"] == 0].index)
+ai = len(data[data["attack"] == 1].index)
+
+print("After Preliminary Feature Selection...")
+print(f"Total normal instances = {ni}")
+print(f"Total DDoS attack instances = {ai}")
+print(f"Final number of instances (normal + attack) = {ni + ai}")
+print("\n")
