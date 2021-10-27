@@ -1,8 +1,10 @@
 moa-release-2021.07.0/
 weka-3-8-5/
 raw-data/
-processed-data/*
-!processed-data/CSV/botiot-10-eda.csv
-!processed-data/INFO/info-botiot-10-eda-subset
+processed-data/TESTS
+processed-data/CSV/EDA-EXTRAS
+processed-data/CSV/botiot-100-original.csv
+processed-data/INFO/EDA-EXTRAS
+processed-data/INFO/info-botiot-complete-original
 src/adasyn.py
 src/dataset-info.py
