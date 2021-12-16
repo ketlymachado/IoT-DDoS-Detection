@@ -56,24 +56,29 @@ parser = argparse.ArgumentParser(description = "Preprocessing")
 parser.add_argument("-p", action = "store", dest = "p", 
                     default = "100", required = True,
                     help = "Percentage of attack instances to be considered.")
-# Argument s is used only for tests to add and extra string to the resulting file name
-parser.add_argument("-s", action = "store", dest = "s", 
-                    default = "", required = False,
-                    help = "String to add to the resulting file name.")
+# Parser to argument path, which determines the path to store the generated CSV file
+parser.add_argument("-path", action = "store", dest = "path", 
+                    default = "../processed-data/CSV/", required = False,
+                    help = "Path (folder) to store the generated CSV file.")
+# Parser to argument i, which determines the path to store info about the generated CSV file
+parser.add_argument("-i", action = "store", dest = "i", 
+                    default = "../processed-data/INFO/", required = False,
+                    help = "Path (folder) to store info about the generated CSV file.")
 
 args = parser.parse_args()
 
 # Adds the header to the data
 with open("../raw-data/UNSW_2018_IoT_Botnet_Dataset_Feature_Names.csv") as features:
-    with open("../processed-data/CSV/botiot-" + args.p + args.s + ".csv", "w") as botiot:
+    with open(args.path + "botiot-" + args.p + ".csv", "w") as botiot:
         header = features.read()[:-1]
         # Source and destination IP addresses extra features
         header = header + ",sipv4_pos1,sipv4_pos2,sipv4_pos3,sipv4_pos4,sipv6_pos1,sipv6_pos2,sipv6_pos3,sipv6_pos4,sipv6_pos5,sipv6_pos6,sipv6_pos7,sipv6_pos8"
         header = header + ",dipv4_pos1,dipv4_pos2,dipv4_pos3,dipv4_pos4,dipv6_pos1,dipv6_pos2,dipv6_pos3,dipv6_pos4,dipv6_pos5,dipv6_pos6,dipv6_pos7,dipv6_pos8\n"
         botiot.write(header)
     botiot.close()
+features.close()
 
-with open("../processed-data/CSV/botiot-" + args.p + args.s + ".csv", "a", newline="") as botiot:
+with open(args.path + "botiot-" + args.p + ".csv", "a", newline="") as botiot:
 
     spamwriter = csv.writer(botiot, delimiter=",", quotechar="\"", quoting=csv.QUOTE_MINIMAL)
 
@@ -115,12 +120,16 @@ with open("../processed-data/CSV/botiot-" + args.p + args.s + ".csv", "a", newli
                     if x < (float(args.p) / 100.00):
                         spamwriter.writerow(row)
                         count_ddos = count_ddos + 1
+
+        data.close()
         bar.next()
     bar.finish()
 
-    print(f"Total normal instances = {count_normal}")
-    print(f"Total DDoS attack instances = {count_ddos}")
-    print(f"Final number of instances (normal + attack) = {count_normal + count_ddos}")
-    print("\n")
+    with open(args.i + "info-botiot-" + args.p, "w") as info:
+        info.write("Total normal instances = " + str(count_normal) + "\n")
+        info.write("Total DDoS attack instances = " + str(count_ddos) + "\n")
+        total = count_normal + count_ddos
+        info.write("Final number of instances (normal + attack) = " + str(total) + "\n")
+    info.close()
 
 botiot.close()
