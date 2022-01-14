@@ -1,25 +1,39 @@
-#########################################################################
-#                                                                       #
-# Project           : IoT DDoS Detection Based on Ensemble Methods for  #
-#                     Evolving Data Stream Classification               #
-#                                                                       #
-# Program name      : preprocessing.py                                  #
-#                                                                       #
-# Authors           : Kétly Gonçalves Machado, Daniel Macêdo Batista    #
-#                                                                       #
-# Purpose           : Preprocesses the data from BoT-IoT dataset and    #
-#                     generates a CSV file containing all the normal    #
-#                     traffic instances and a sample (or all, depending #
-#                     on the percentage inputed) of the DDoS attack     #
-#                     (except HTTP) traffic instances.                  #
-#                                                                       #
-#########################################################################
+###################################################################
+#                                                                 #
+# Project      : IoT DDoS Detection Based on Ensemble Methods for #
+#                Evolving Data Stream Classification              #
+#                                                                 #
+# Program name : preprocessing.py                                 #
+#                                                                 #
+# Authors      : Kétly Gonçalves Machado, Daniel Macêdo Batista   #
+#                                                                 #
+# Purpose      : Preprocesses the data from the original files of #
+#                the BoT-IoT dataset and generates a single CSV   #
+#                file containing all the normal traffic instances #
+#                and a percentage (accordingly to the input       #
+#                parameter "-p") of the DDoS attack (except HTTP) #
+#                traffic instances.                               #
+#                                                                 #
+###################################################################
 
 import argparse
 import csv
 import random
 import re
 from progress.bar import Bar
+
+parser = argparse.ArgumentParser(description = "BoT-IoT Preprocessing")
+
+parser.add_argument("-p", action = "store", dest = "p", default = "100", required = False,
+                    help = "Percentage of attack instances to be considered.")
+
+parser.add_argument("-csvpath", action = "store", dest = "path", default = "../processed-data/CSV/", 
+                    required = False, help = "Path to the folder where the generated CSV file will be stored.")
+
+parser.add_argument("-infopath", action = "store", dest = "i", default = "../processed-data/INFO/", 
+                    required = False, help = "Path to the folder to store info about the generated CSV file.")
+
+args = parser.parse_args()
 
 # Splits IPv4 into 4 new features, one per part of the address
 # Sets IPv6 features to -1
@@ -50,23 +64,6 @@ def ipv6(row, index):
     for e in ipv6:
         row.append(e)
 
-# Parser to argument p, which determines the percentage of attack instances 
-# to be considered in the preprocessing of the BoT-IoT dataset
-parser = argparse.ArgumentParser(description = "Preprocessing")
-parser.add_argument("-p", action = "store", dest = "p", 
-                    default = "100", required = True,
-                    help = "Percentage of attack instances to be considered.")
-# Parser to argument path, which determines the path to store the generated CSV file
-parser.add_argument("-path", action = "store", dest = "path", 
-                    default = "../processed-data/CSV/", required = False,
-                    help = "Path (folder) to store the generated CSV file.")
-# Parser to argument i, which determines the path to store info about the generated CSV file
-parser.add_argument("-i", action = "store", dest = "i", 
-                    default = "../processed-data/INFO/", required = False,
-                    help = "Path (folder) to store info about the generated CSV file.")
-
-args = parser.parse_args()
-
 # Adds the header to the data
 with open("../raw-data/UNSW_2018_IoT_Botnet_Dataset_Feature_Names.csv") as features:
     with open(args.path + "botiot-" + args.p + ".csv", "w") as botiot:
@@ -95,13 +92,15 @@ with open(args.path + "botiot-" + args.p + ".csv", "a", newline="") as botiot:
 
     # Reads each one of the files from the original dataset
     for i in range(1, 75):
+        
         with open("../raw-data/UNSW_2018_IoT_Botnet_Dataset_" + str(i) + ".csv") as data:
 
             csv_reader = csv.reader(data, delimiter=",")
 
             for row in csv_reader:
+                
                 # Source and destination IP addresses technique to convert from categorical to numerical
-                    # Done at this point to avoid deal with it in the memory while performing the EDA
+                    # Done at this point to avoid a possible future use of memory to process it
                 if (pattern.match(row[4])):
                     ipv4(row, 4)
                 else:
@@ -110,7 +109,8 @@ with open(args.path + "botiot-" + args.p + ".csv", "a", newline="") as botiot:
                     ipv4(row, 6)
                 else:
                     ipv6(row, 6)
-                # We consider the instance only if it is either normal or DDoS attack traffic (except HTTP)
+
+                # It considers the instance only if it is either normal or DDoS attack traffic (except HTTP)
                 if row[33] == "Normal":
                     spamwriter.writerow(row)
                     count_normal = count_normal + 1

@@ -11,6 +11,8 @@
 #                                                                       #
 #########################################################################
 
+#This advanced processing is performed taking into account the information obtained from the Exploratory Data Analysis
+
 import argparse
 import csv
 
