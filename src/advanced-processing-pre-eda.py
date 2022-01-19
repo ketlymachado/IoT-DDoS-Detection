@@ -19,17 +19,27 @@
 import argparse
 import csv
 
-parser = argparse.ArgumentParser(description = "Advanced Processing")
+def parse():
+    parser = argparse.ArgumentParser(description = "Advanced Processing")
 
-parser.add_argument("-csv", action = "store", dest = "csv", 
-                    default = "../processed-data/CSV/botiot-complete.csv", required = False,
-                    help = "Path to the target file to be further processed.")
+    parser.add_argument("-csv", action = "store", dest = "csv", 
+                        default = "../processed-data/CSV/botiot-complete.csv", required = False,
+                        help = "Path to the target file to be further processed.")
 
-parser.add_argument("-arff", action = "store", dest = "arff", 
-                    default = "../processed-data/ARFF/experiments/botiot.arff", required = False,
-                    help = "Path (file) to store the generated ARFF file.")
+    parser.add_argument("-arff", action = "store", dest = "arff", 
+                        default = "../processed-data/ARFF/experiments/botiot.arff", required = False,
+                        help = "Path (file) to store the generated ARFF file.")
 
-args = parser.parse_args()
+    return parser.parse_args()
+
+def check_null_int(feature):
+    if feature == "": return -1
+    elif "x" in (feature): return int(feature, 16)
+    else: return int(feature)
+
+def check_null_float(feature):
+    if feature == "": return -1
+    else: return float(feature)
 
 header = ["@relation botiot\n",
           "@attribute 'pkseqid' numeric\n",
@@ -116,14 +126,7 @@ header = ["@relation botiot\n",
           "@attribute 'attack' {normal, attack}\n",
           "@data\n"]
 
-def check_null_int(feature):
-    if feature == "": return -1
-    elif "x" in (feature): return int(feature, 16)
-    else: return int(feature)
-
-def check_null_float(feature):
-    if feature == "": return -1
-    else: return float(feature)
+args = parse()
 
 with open(args.arff, "w", newline="") as ARFF_botiot:
 

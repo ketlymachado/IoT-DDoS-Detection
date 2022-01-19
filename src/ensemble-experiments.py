@@ -22,15 +22,24 @@ import argparse
 import os
 import subprocess as sp
 
-parser = argparse.ArgumentParser(description = "Ensemble Experiments")
+def parse():
+    parser = argparse.ArgumentParser(description = "Ensemble Experiments")
 
-parser.add_argument("-input", action = "store", dest = "input", required = True,
-                    help = "Path to the folder that contains the ARFF files that will be the input for the ensemble experiments.")
+    parser.add_argument("-input", action = "store", dest = "input", required = True,
+                        help = "Path to the folder that contains the ARFF files that will be the input for the ensemble experiments.")
 
-parser.add_argument("-output", action = "store", dest = "output", required = True,
-                    help = "Path to the folder that will store the results from the ensemble experiments performed.")
+    parser.add_argument("-output", action = "store", dest = "output", required = True,
+                        help = "Path to the folder that will store the results from the ensemble experiments performed.")
 
-args = parser.parse_args()
+    arguments = parser.parse_args()
+
+    if (arguments.input[-1] != "/"):
+        arguments.input = arguments.input + "/"
+
+    if (arguments.output[-1] != "/"):
+        arguments.output = arguments.output + "/"
+
+    return arguments
 
 def ensemble(i):
     if i == 0: return "ADACC"
@@ -42,11 +51,7 @@ def ensemble(i):
     elif i == 6: return "OzaBagASHT"
     elif i == 7: return "OzaBoost"
 
-if (args.input[-1] != "/"):
-    args.input = args.input + "/"
-
-if (args.output[-1] != "/"):
-    args.output = args.output + "/"
+args = parse()
 
 for i in range(0, 8):
     path = args.output + ensemble(i)

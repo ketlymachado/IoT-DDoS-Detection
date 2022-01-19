@@ -22,18 +22,27 @@ import random
 import re
 from progress.bar import Bar
 
-parser = argparse.ArgumentParser(description = "BoT-IoT Preprocessing")
+def parse():
+    parser = argparse.ArgumentParser(description = "BoT-IoT Preprocessing")
+    
+    parser.add_argument("-p", action = "store", dest = "p", default = "100", required = False,
+                        help = "Percentage of attack instances to be considered.")
 
-parser.add_argument("-p", action = "store", dest = "p", default = "100", required = False,
-                    help = "Percentage of attack instances to be considered.")
+    parser.add_argument("-csvpath", action = "store", dest = "csvpath", default = "../processed-data/CSV/", 
+                        required = False, help = "Path to the folder where the generated CSV file will be stored.")
 
-parser.add_argument("-csvpath", action = "store", dest = "path", default = "../processed-data/CSV/", 
-                    required = False, help = "Path to the folder where the generated CSV file will be stored.")
+    parser.add_argument("-infopath", action = "store", dest = "infopath", default = "../processed-data/INFO/", 
+                        required = False, help = "Path to the folder to store info about the generated CSV file.")
 
-parser.add_argument("-infopath", action = "store", dest = "i", default = "../processed-data/INFO/", 
-                    required = False, help = "Path to the folder to store info about the generated CSV file.")
+    arguments = parser.parse_args()
 
-args = parser.parse_args()
+    if (arguments.csvpath[-1] != "/"):
+        arguments.csvpath = arguments.csvpath + "/"
+
+    if (arguments.infopath[-1] != "/"):
+        arguments.infopath = arguments.infopath + "/"
+
+    return arguments
 
 # Splits IPv4 into 4 new features, one per part of the address
 # Sets IPv6 features to -1
@@ -64,9 +73,11 @@ def ipv6(row, index):
     for e in ipv6:
         row.append(e)
 
+args = parse()
+
 # Adds the header to the data
 with open("../raw-data/UNSW_2018_IoT_Botnet_Dataset_Feature_Names.csv") as features:
-    with open(args.path + "botiot-" + args.p + ".csv", "w") as botiot:
+    with open(args.csvpath + "botiot-" + args.p + ".csv", "w") as botiot:
         header = features.read()[:-1]
         # Source and destination IP addresses extra features
         header = header + ",sipv4_pos1,sipv4_pos2,sipv4_pos3,sipv4_pos4,sipv6_pos1,sipv6_pos2,sipv6_pos3,sipv6_pos4,sipv6_pos5,sipv6_pos6,sipv6_pos7,sipv6_pos8"
@@ -75,7 +86,7 @@ with open("../raw-data/UNSW_2018_IoT_Botnet_Dataset_Feature_Names.csv") as featu
     botiot.close()
 features.close()
 
-with open(args.path + "botiot-" + args.p + ".csv", "a", newline="") as botiot:
+with open(args.csvpath + "botiot-" + args.p + ".csv", "a", newline="") as botiot:
 
     spamwriter = csv.writer(botiot, delimiter=",", quotechar="\"", quoting=csv.QUOTE_MINIMAL)
 
@@ -125,7 +136,7 @@ with open(args.path + "botiot-" + args.p + ".csv", "a", newline="") as botiot:
         bar.next()
     bar.finish()
 
-    with open(args.i + "info-botiot-" + args.p, "w") as info:
+    with open(args.infopath + "info-botiot-" + args.p, "w") as info:
         info.write("Total normal instances = " + str(count_normal) + "\n")
         info.write("Total DDoS attack instances = " + str(count_ddos) + "\n")
         total = count_normal + count_ddos
