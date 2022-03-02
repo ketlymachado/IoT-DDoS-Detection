@@ -76,7 +76,7 @@ def ipv6(row, index):
 args = parse()
 
 # Adds the header to the data
-with open("../raw-data/UNSW_2018_IoT_Botnet_Dataset_Feature_Names.csv") as features:
+with open("../raw-data/BoT-IoT/UNSW_2018_IoT_Botnet_Dataset_Feature_Names.csv") as features:
     with open(args.csvpath + "botiot-" + args.p + ".csv", "w") as botiot:
         header = features.read()[:-1]
         # Source and destination IP addresses extra features
@@ -104,7 +104,7 @@ with open(args.csvpath + "botiot-" + args.p + ".csv", "a", newline="") as botiot
     # Reads each one of the files from the original dataset
     for i in range(1, 75):
         
-        with open("../raw-data/UNSW_2018_IoT_Botnet_Dataset_" + str(i) + ".csv") as data:
+        with open("../raw-data/BoT-IoT/UNSW_2018_IoT_Botnet_Dataset_" + str(i) + ".csv") as data:
 
             csv_reader = csv.reader(data, delimiter=",")
 

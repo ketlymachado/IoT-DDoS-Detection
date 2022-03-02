@@ -1,3 +1,27 @@
+###################################################################
+#                                                                 #
+# Project      : IoT DDoS Detection Based on Ensemble Methods for #
+#                Evolving Data Stream Classification              #
+#                                                                 #
+# Program name : plot-results-pt-br.py                            #
+#                                                                 #
+# Authors      : Kétly Gonçalves Machado, Daniel Macêdo Batista   #
+#                                                                 #
+# Purpose      : Generates two kinds of plots that describe the   #
+#                results of the ensemble experiments performed.   #
+#                Uses the result files passed through parameter   #
+#                "-input" to generate a lineplot including the    #
+#                results from all the ensemble methods in a       #
+#                single plot. Also, generates a facetgrid that    #
+#                presents a plot per ensemble method to show the  #
+#                results individually. Both plots are stored in   #
+#                the path informed through the parameter          #
+#                "-output".                                       #
+#                                                                 #
+#                The language used in these plots is PT-BR.       #
+#                                                                 #
+###################################################################
+
 import argparse
 import matplotlib.pyplot as plt
 import os
@@ -45,6 +69,7 @@ def ensemble_NAME(i):
 
 def plot(input_path, suffix, output_path):
 
+    # Creates individual folders for each plot
     path = output_path + "facetgrid"
     if not os.path.exists(path):
         os.makedirs(path)
@@ -59,6 +84,8 @@ def plot(input_path, suffix, output_path):
                   font = "Liberation Serif",
                   font_scale = 1.5)
 
+    # Creates a single dataframe with the results from all ensemble methods
+    
     ensemble = pd.read_csv(input_path + "ADACC/adacc-" + suffix + ".csv")
     result = ensemble[["classified instances"]]
     result = result.rename(columns={"classified instances": "Instâncias"})
@@ -72,8 +99,10 @@ def plot(input_path, suffix, output_path):
         if i >= 8: break
         ensemble = pd.read_csv(input_path + ensemble_NAME(i) + "/" + ensemble_name(i) + "-" + suffix + ".csv")
 
+    # Adjusts the DataFrame to make it possible to plot all ensemble methods at once
     resultm = result.melt("Instâncias", var_name = "Ensemble", value_name = "Acurácia (%)")
 
+    # Lineplot
     sns.lineplot(x = "Instâncias", 
                  y = "Acurácia (%)", 
                  hue = "Ensemble",
@@ -84,6 +113,7 @@ def plot(input_path, suffix, output_path):
     plt.tight_layout()
     plt.savefig(output_path + "lineplot/lp-" + suffix + ".eps", format="eps")
 
+    # Facetgrid
     ax = sns.FacetGrid(data = resultm, col = "Ensemble", hue = "Ensemble", col_wrap = 2)
     ax.map(sns.lineplot, "Instâncias", "Acurácia (%)")
     
@@ -99,8 +129,14 @@ args = parse()
 
 adacc_dir = args.input + "ADACC/"
 
+# Performs the plot for all the experiments in the folder "-input"
 for filename in sorted(os.listdir(adacc_dir)):
     file = os.path.join(adacc_dir, filename)
     if os.path.isfile(file):
         suffix = file[-10:-4]
+        # Assumes that the end of the names of the files follow the structure "XXXXXX.csv"
+        # where the Xs represent the percentage of attack instances from the original dataset 
+        # (i.e. 100.00.csv or 0.0125.csv)
+        # IMPORTANT: This does not generate an error, but makes the names of the resulting
+        # plots more elegant.
         plot(args.input, suffix, args.output)

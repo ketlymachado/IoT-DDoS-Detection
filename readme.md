@@ -1,10 +1,12 @@
-# Research Project: [Title TBD]
+# Research Project: IoT DDoS Detection Based on Ensemble Methods for Evolving Data Stream Classification
 
-Department of Computer Science
-University of São Paulo
+Authors: Kétly Gonçalves Machado ([ketly@ime.usp.br](mailto:ketly@ime.usp.br)), Daniel Macêdo Batista ([batista@ime.usp.br](mailto:batista@ime.usp.br))
+
+[Department of Computer Science](https://www.ime.usp.br/en/computer-science-department/)
+
+[University of São Paulo](https://www5.usp.br/#english)
+
 São Paulo, Brazil
-
-Authors: Kétly Gonçalves Machado, Daniel Macêdo Batista
 
 ## References
 

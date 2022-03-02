@@ -6,9 +6,12 @@ moa-release-2021.07.0/license
 moa-release-2021.07.0/src
 moa-results/plots/threshold-0.0125-1
 moa-results/plots/full-dataset-all-features
+moa-results/tests
+notebooks/nsl-kdd.ipynb
 processed-data/ARFF
 processed-data/CSV
 processed-data/INFO
 processed-data/TESTS
-raw-data/*
-!raw-data/raw-data-readme.md
+raw-data/BoT-IoT
+raw-data/NSL-KDD
+src/processing-nsl-kdd.py
