@@ -86,7 +86,7 @@ with open("../raw-data/BoT-IoT/UNSW_2018_IoT_Botnet_Dataset_Feature_Names.csv") 
     botiot.close()
 features.close()
 
-with open(args.csvpath + "botiot-" + args.p + ".csv", "a", newline="") as botiot:
+with open(args.csvpath + "botiot-" + args.p + ".csv", "w", newline="") as botiot:
 
     spamwriter = csv.writer(botiot, delimiter=",", quotechar="\"", quoting=csv.QUOTE_MINIMAL)
 
