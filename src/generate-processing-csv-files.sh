@@ -1,3 +1,20 @@
+###################################################################
+#                                                                 #
+# Project      : IoT DDoS Detection Based on Ensemble Methods for #
+#                Evolving Data Stream Classification              #
+#                                                                 #
+# Program name : generate-processing-csv-files.sh                 #
+#                                                                 #
+# Authors      : Kétly Gonçalves Machado, Daniel Macêdo Batista   #
+#                                                                 #
+# Purpose      : Generates several CSV files containing           #
+#                percentages of the BoT-IoT dataset, accordingly  #
+#                to start, finish and interval parameters. To     #
+#                generate the CSV files uses the preprocessing.py #
+#                program.                                         #
+#                                                                 #
+###################################################################
+
 unset -v start
 unset -v finish
 unset -v interval

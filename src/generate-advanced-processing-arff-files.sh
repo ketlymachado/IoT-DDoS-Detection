@@ -1,3 +1,23 @@
+###################################################################
+#                                                                 #
+# Project      : IoT DDoS Detection Based on Ensemble Methods for #
+#                Evolving Data Stream Classification              #
+#                                                                 #
+# Program name : generate-advanced-processing-arff-files.sh       #
+#                                                                 #
+# Authors      : Kétly Gonçalves Machado, Daniel Macêdo Batista   #
+#                                                                 #
+# Purpose      : Generates advanced processing on CSV files that  #
+#                contain BoT-IoT data, accordingly to option      #
+#                parameter, that defines which type of processing #
+#                will be performed. Also converts CSV files to    #
+#                ARFF files, that can be used to perform          #
+#                experiments at Massive Online Analysis (MOA).    #
+#                To do so, uses the proper advanced-processing    #
+#                program.                                         #
+#                                                                 #
+###################################################################
+
 unset -v foldername
 unset -v option
 
