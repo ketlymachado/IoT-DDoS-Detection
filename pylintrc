@@ -1,0 +1,4 @@
+[MESSAGES CONTROL]
+ignore=pylintrc
+disable=
+    missing-module-docstring
