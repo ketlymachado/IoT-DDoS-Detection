@@ -6,3 +6,4 @@ raw-data/*
 !raw-data/readme.md
 results/plots/*
 !results/plots/readme.md
+weka-3-8-6

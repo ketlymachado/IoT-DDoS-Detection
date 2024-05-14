@@ -32,68 +32,23 @@ import os
 from multiprocessing import Pool
 from tap import Tap
 
-
-def restricted_float(x) -> float:
-    """Function validates restricted float."""
-    try:
-        x = float(x)
-    except TypeError as e:
-        raise argparse.ArgumentTypeError(f"{x} not a floating-point literal") from e
-
-    if x < 0.0 or x > 100.0:
-        raise argparse.ArgumentTypeError(f"{x} not in range [0.0, 100.0]")
-    return x
+DATASET_FEATURES_FILE = (
+    "../raw-data/BoT-IoT/UNSW_2018_IoT_Botnet_Dataset_Feature_Names.csv"
+)
+DATASET_FOLDER = "../raw-data/BoT-IoT/"
+DATASET_FILE_PREFIX = "UNSW_2018_IoT_Botnet_Dataset_"
 
 
-class ArgumentParser(Tap):
-    """Class defines arguments typing."""
-
-    percentage: float | None = None  # percentage of attack instances
-    start: float | None = None  # the range start
-    finish: float | None = None  # the range finish
-    interval: float | None = None  # the range interval
-    folder: str  # folder to store resulting files
-    decimals: int = 4  # number of decimals digits to consider
-
-
-def parse():
-    """Function parses arguments."""
-    parser = ArgumentParser(
-        description="BoT-IoT Preprocessing",
-        usage="""This program can be used to preprocess the BoT-IoT dataset.
-        A percentage or a range, defined by start, finish and interval, 
-        must be informed to define the amount of attack instances that will
-        be included in the final resulting CSV file.""",
-    )
-
-    arguments = parser.parse_args()
-
-    if arguments.percentage is None and (
-        arguments.start is None
-        or arguments.finish is None
-        or arguments.interval is None
-    ):
-        parser.error("a percentage or a range of percentages must be informed")
-
-    if not arguments.percentage is None:
-        restricted_float(arguments.percentage)
-    else:
-        restricted_float(arguments.start)
-        restricted_float(arguments.finish)
-        restricted_float(arguments.interval)
-
-    return arguments
-
-
-# Splits IPv4 into 4 new features, one per part of the address
-# Sets IPv6 features to -1
-def handle_ipv4(row: "list[str]", index: int) -> None:
-    """Function handles IPv4 conversion."""
-    ipv4 = row[index].split(".")
-    for element in ipv4:
-        row.append(element)
-    for _ in range(8):
-        row.append(-1)
+def create_info_file(file: str, normal_instances: int, attack_instances: int) -> None:
+    """Function creates info file about the processed data."""
+    with open(file, "w", encoding="utf-8") as info_file:
+        info_file.write("Total normal instances = " + str(normal_instances) + "\n")
+        info_file.write("Total DDoS attack instances = " + str(attack_instances) + "\n")
+        total = normal_instances + attack_instances
+        info_file.write(
+            "Final number of instances (normal + attack) = " + str(total) + "\n"
+        )
+    info_file.close()
 
 
 # Splits IPv6 into 8 new features, one per part of the address
@@ -123,10 +78,21 @@ def handle_ipv6(row: "list[str]", index: int) -> None:
         row.append(element)
 
 
+# Splits IPv4 into 4 new features, one per part of the address
+# Sets IPv6 features to -1
+def handle_ipv4(row: "list[str]", index: int) -> None:
+    """Function handles IPv4 conversion."""
+    ipv4 = row[index].split(".")
+    for element in ipv4:
+        row.append(element)
+    for _ in range(8):
+        row.append(-1)
+
+
 def add_header(file: str) -> None:
     """Function adds header to processed file."""
     with open(
-        "../raw-data/BoT-IoT/UNSW_2018_IoT_Botnet_Dataset_Feature_Names.csv",
+        DATASET_FEATURES_FILE,
         encoding="utf-8",
     ) as features:
         with open(file, "w", encoding="utf-8") as processed_file:
@@ -147,18 +113,6 @@ def add_header(file: str) -> None:
     features.close()
 
 
-def create_info_file(file: str, normal_instances: int, attack_instances: int) -> None:
-    """Function creates info file about the processed data."""
-    with open(file, "w", encoding="utf-8") as info_file:
-        info_file.write("Total normal instances = " + str(normal_instances) + "\n")
-        info_file.write("Total DDoS attack instances = " + str(attack_instances) + "\n")
-        total = normal_instances + attack_instances
-        info_file.write(
-            "Final number of instances (normal + attack) = " + str(total) + "\n"
-        )
-    info_file.close()
-
-
 def create_processed_file(percentage: str) -> None:
     """Function creates the processed file."""
 
@@ -168,13 +122,13 @@ def create_processed_file(percentage: str) -> None:
     count_ddos = 0
 
     # Defines the pattern for IPv4
-    pattern = re.compile("^(\\d{1,3}\\.){3}\\d{1,3}$")
+    ipv4_pattern = re.compile("^(\\d{1,3}\\.){3}\\d{1,3}$")
 
-    filepath = os.path.join(csvpath, "botiot-" + percentage + ".csv")
-
-    add_header(filepath)
+    filepath = os.path.join(csv_path, "botiot-" + percentage + ".csv")
 
     with open(filepath, "w", newline="", encoding="utf-8") as processed_file:
+        add_header(filepath)
+
         spamwriter = csv.writer(
             processed_file, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL
         )
@@ -182,8 +136,8 @@ def create_processed_file(percentage: str) -> None:
         # Reads each one of the files from the original dataset
         for i in range(1, 75):
             original_file = os.path.join(
-                "../raw-data/BoT-IoT/",
-                "UNSW_2018_IoT_Botnet_Dataset_" + str(i) + ".csv",
+                DATASET_FOLDER,
+                DATASET_FILE_PREFIX + str(i) + ".csv",
             )
 
             with open(original_file, encoding="utf-8") as subset_file:
@@ -192,12 +146,12 @@ def create_processed_file(percentage: str) -> None:
                 for instance in data:
                     # Convert source and destination IP addresses from categorical to numerical
                     # Done at this point to avoid a possible future use of memory to process it
-                    if pattern.match(instance[columns["source_ip"]]):
+                    if ipv4_pattern.match(instance[columns["source_ip"]]):
                         handle_ipv4(instance, columns["source_ip"])
                     else:
                         handle_ipv6(instance, columns["source_ip"])
 
-                    if pattern.match(instance[columns["destination_ip"]]):
+                    if ipv4_pattern.match(instance[columns["destination_ip"]]):
                         handle_ipv4(instance, columns["destination_ip"])
                     else:
                         handle_ipv6(instance, columns["destination_ip"])
@@ -220,7 +174,7 @@ def create_processed_file(percentage: str) -> None:
     processed_file.close()
 
     create_info_file(
-        os.path.join(infopath, "info-botiot-" + percentage + ".txt"),
+        os.path.join(info_path, "info-botiot-" + percentage + ".txt"),
         count_normal,
         count_ddos,
     )
@@ -229,19 +183,73 @@ def create_processed_file(percentage: str) -> None:
 def create_folders() -> None:
     """Function creates the destination folders."""
     try:
-        if not os.path.exists(csvpath):
-            os.makedirs(csvpath)
+        if not os.path.exists(csv_path):
+            os.makedirs(csv_path)
 
-        if not os.path.exists(infopath):
-            os.makedirs(infopath)
+        if not os.path.exists(info_path):
+            os.makedirs(info_path)
     except OSError as e:
         raise OSError("Error while creating destination folders") from e
 
 
+def restricted_float(x) -> float:
+    """Function validates restricted float."""
+    try:
+        x = float(x)
+    except TypeError as e:
+        raise argparse.ArgumentTypeError(f"{x} not a floating-point literal") from e
+
+    if x < 0.0 or x > 100.0:
+        raise argparse.ArgumentTypeError(f"{x} not in range [0.0, 100.0]")
+    return x
+
+
+class ArgumentParser(Tap):
+    """Class defines arguments typing."""
+
+    percentage: float | None = None  # percentage of attack instances
+    start: float | None = None  # the range start
+    finish: float | None = None  # the range finish
+    interval: float | None = None  # the range interval
+    folder: str  # folder to store resulting files
+    decimals: int = 4  # number of decimals digits to consider
+
+
+def parse() -> ArgumentParser:
+    """Function parses arguments."""
+    parser = ArgumentParser(
+        description="BoT-IoT Preprocessing",
+        usage="""This program can be used to preprocess the BoT-IoT dataset.
+        A percentage or a range, defined by start, finish and interval, 
+        must be informed to define the amount of attack instances that will
+        be included in the final resulting CSV file.""",
+    )
+
+    arguments = parser.parse_args()
+
+    if arguments.percentage is None and (
+        arguments.start is None
+        or arguments.finish is None
+        or arguments.interval is None
+    ):
+        parser.error("a percentage or a range of percentages must be informed")
+
+    if not arguments.percentage is None:
+        restricted_float(arguments.percentage)
+    else:
+        restricted_float(arguments.start)
+        restricted_float(arguments.finish)
+        restricted_float(arguments.interval)
+
+    return arguments
+
+
 args = parse()
 
-csvpath = os.path.join(args.folder, "CSV")
-infopath = os.path.join(args.folder, "INFO")
+csv_path = os.path.join(args.folder, "CSV")
+info_path = os.path.join(args.folder, "INFO")
+
+create_folders()
 
 if not args.percentage is None:
     create_processed_file(str(args.percentage))
