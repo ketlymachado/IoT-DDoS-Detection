@@ -24,6 +24,7 @@
 
 import csv
 import os
+from tqdm import tqdm
 from tap import Tap
 
 
@@ -70,7 +71,7 @@ def parse() -> ArgumentParser:
 args = parse()
 
 csv_folder_path = os.path.join(args.folder, "CSV")
-arff_folder_path = os.path.join(args.folder, "ARFF")
+arff_folder_path = os.path.join(args.folder, "ARFF-FS")
 
 create_folder()
 
@@ -82,7 +83,7 @@ csv_files = [
 
 print("Process started...")
 
-for csv_filename in csv_files:
+for csv_filename in tqdm(csv_files):
 
     csv_path = os.path.join(csv_folder_path, csv_filename)
 

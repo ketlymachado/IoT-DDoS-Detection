@@ -18,36 +18,64 @@
 
 import csv
 import os
-import enum
+from enum import IntEnum
+from tqdm import tqdm
 from tap import Tap
 
 
-COLUMNS = {
-    "int_validation": [0, 5, 7, 8, 9, 12, 25, 26, 27, 28],
-    "float_validation": [
-        1,
-        11,
-        13,
-        14,
-        15,
-        16,
-        17,
-        18,
-        19,
-        20,
-        21,
-        22,
-        23,
-        24,
-        29,
-        30,
-        31,
-    ],
-    "flgs_col": 2,
-    "proto_col": 3,
-    "state_col": 10,
-    "label_col": 32,
-}
+class IntegerFeatures(IntEnum):
+    "Features that must be an integer and its indexes"
+    PKSEQID = 0
+    SPORT = 5
+    DPORT = 7
+    PKTS = 8
+    BYTES = 9
+    SEQ = 12
+    SPKTS = 25
+    DPKTS = 26
+    SBYTES = 27
+    DBYTES = 28
+
+
+class NumberFeatures(IntEnum):
+    "Features that must be a number and its indexes"
+    STIME = 1
+    LTIME = 11
+    DUR = 13
+    MEAN = 14
+    STDDEV = 15
+    SMAC = 16
+    DMAC = 17
+    SUM = 18
+    MIN = 19
+    MAX = 20
+    SOUI = 21
+    DOUI = 22
+    SCO = 23
+    DCO = 24
+    RATE = 29
+    SRATE = 30
+    DRATE = 31
+
+
+class RemovalFeatures(IntEnum):
+    "Features that must be removed and its indexes"
+    SADDR = 4
+    DADDR = 6
+    CATEGORY = 33
+    SUBCATEGORY = 34
+
+
+class DummieFeatures(IntEnum):
+    "Features that must be replaced by its dummies"
+    FLGS = 2
+    PROTO = 3
+    STATE = 10
+
+
+LABEL_FEATURE = 32
+
+
 HEADER = [
     "@relation botiot\n",
     "@attribute 'pkseqid' numeric\n",
@@ -155,51 +183,44 @@ def replace_by_number(feature: str) -> float:
     return float(feature)
 
 
-class DummieFeatures(enum.Enum):
-    "Features that should be replaced by its dummies"
-    FLGS = "flgs"
-    PROTO = "proto"
-    STATE = "state"
-
-
-def get_dummies(feature: str, feature_name: DummieFeatures) -> "list[int]":
+def get_dummies(feature_value: str, feature_idx: DummieFeatures) -> "list[int]":
     """Replace feature by its dummies using one-hot encoding."""
 
-    if feature_name == DummieFeatures.FLGS:
+    if feature_idx == DummieFeatures.FLGS:
         return [
-            (1 if feature == "e *" else 0),
-            (1 if feature == "e" else 0),
-            (1 if feature == "e    F" else 0),
-            (1 if feature == "e s" else 0),
-            (1 if feature == "eU" else 0),
-            (1 if feature == "e g" else 0),
-            (1 if feature == "e &" else 0),
-            (1 if feature == "e d" else 0),
-            (1 if feature == "e r" else 0),
+            (1 if feature_value == "e *" else 0),
+            (1 if feature_value == "e" else 0),
+            (1 if feature_value == "e    F" else 0),
+            (1 if feature_value == "e s" else 0),
+            (1 if feature_value == "eU" else 0),
+            (1 if feature_value == "e g" else 0),
+            (1 if feature_value == "e &" else 0),
+            (1 if feature_value == "e d" else 0),
+            (1 if feature_value == "e r" else 0),
         ]
 
-    if feature_name == DummieFeatures.PROTO:
+    if feature_idx == DummieFeatures.PROTO:
         return [
-            (1 if feature == "icmp" else 0),
-            (1 if feature == "igmp" else 0),
-            (1 if feature == "udp" else 0),
-            (1 if feature == "arp" else 0),
-            (1 if feature == "tcp" else 0),
-            (1 if feature == "ipv6-icmp" else 0),
-            (1 if feature == "rarp" else 0),
+            (1 if feature_value == "icmp" else 0),
+            (1 if feature_value == "igmp" else 0),
+            (1 if feature_value == "udp" else 0),
+            (1 if feature_value == "arp" else 0),
+            (1 if feature_value == "tcp" else 0),
+            (1 if feature_value == "ipv6-icmp" else 0),
+            (1 if feature_value == "rarp" else 0),
         ]
 
-    if feature_name == DummieFeatures.STATE:
+    if feature_idx == DummieFeatures.STATE:
         return [
-            (1 if feature == "RSP" else 0),
-            (1 if feature == "CON" else 0),
-            (1 if feature == "FIN" else 0),
-            (1 if feature == "REQ" else 0),
-            (1 if feature == "ACC" else 0),
-            (1 if feature == "NRS" else 0),
-            (1 if feature == "URP" else 0),
-            (1 if feature == "RST" else 0),
-            (1 if feature == "INT" else 0),
+            (1 if feature_value == "RSP" else 0),
+            (1 if feature_value == "CON" else 0),
+            (1 if feature_value == "FIN" else 0),
+            (1 if feature_value == "REQ" else 0),
+            (1 if feature_value == "ACC" else 0),
+            (1 if feature_value == "NRS" else 0),
+            (1 if feature_value == "URP" else 0),
+            (1 if feature_value == "RST" else 0),
+            (1 if feature_value == "INT" else 0),
         ]
 
     raise TypeError("Feature name is invalid")
@@ -249,7 +270,7 @@ csv_files = [
 
 print("Process started...")
 
-for csv_filename in csv_files:
+for csv_filename in tqdm(csv_files):
 
     csv_path = os.path.join(csv_folder_path, csv_filename)
 
@@ -279,24 +300,21 @@ for csv_filename in csv_files:
                     instance = []
 
                     for idx, col in enumerate(row):
-                        if idx in COLUMNS["int_validation"]:
+                        if idx in iter(IntegerFeatures):
                             instance.append(replace_by_int(col))
-                        elif idx in COLUMNS["float_validation"]:
+                        elif idx in iter(NumberFeatures):
                             instance.append(replace_by_number(col))
-                        elif idx == COLUMNS["flgs_col"]:
-                            instance = instance + get_dummies(col, DummieFeatures.FLGS)
-                        elif idx == COLUMNS["proto_col"]:
-                            instance = instance + get_dummies(col, DummieFeatures.PROTO)
-                        elif idx == COLUMNS["state_col"]:
-                            instance = instance + get_dummies(col, DummieFeatures.STATE)
-                        elif idx == COLUMNS["label_col"]:
+                        elif idx in iter(DummieFeatures):
+                            instance = instance + get_dummies(col, idx)
+                        elif idx == LABEL_FEATURE:
                             # Establishes the label as the only categorical feature
                             # since this is required by some of the algorithms used in MOA
-                            instance.append("attack" if int(col) == 1 else "normal")
-                        else:
-                            # nem todos tem que entrar aqui, precisa validar as colunas
+                            LABEL = "attack" if int(col) == 1 else "normal"
+                        elif idx not in iter(RemovalFeatures):
                             instance.append(col)
 
+                    # label must be the last feature
+                    instance.append(LABEL)
                     writer.writerow(instance)
 
         arff_file.close()

@@ -29,13 +29,12 @@ import csv
 import random
 import re
 import os
-from multiprocessing import Pool
+from pathlib import Path
 from tap import Tap
+from p_tqdm import p_map
+from tqdm import tqdm
 
-DATASET_FEATURES_FILE = (
-    "../raw-data/BoT-IoT/UNSW_2018_IoT_Botnet_Dataset_Feature_Names.csv"
-)
-DATASET_FOLDER = "../raw-data/BoT-IoT/"
+DATASET_FOLDER = os.path.join(Path(__file__).absolute().parent, "../raw-data/BoT-IoT/")
 DATASET_FILE_PREFIX = "UNSW_2018_IoT_Botnet_Dataset_"
 
 
@@ -91,26 +90,30 @@ def handle_ipv4(row: "list[str]", index: int) -> None:
 
 def add_header(file: str) -> None:
     """Function adds header to processed file."""
+    features_file_name = "Feature_Names.csv"
+
     with open(
-        DATASET_FEATURES_FILE,
+        os.path.join(DATASET_FOLDER, DATASET_FILE_PREFIX + features_file_name),
         encoding="utf-8",
     ) as features:
-        with open(file, "w", encoding="utf-8") as processed_file:
-            header = features.read()[:-1]
-            # Source and destination IP addresses extra features
-            header = (
-                header
-                + ","
-                + "sipv4_pos1,sipv4_pos2,sipv4_pos3,sipv4_pos4,"
-                + "sipv6_pos1,sipv6_pos2,sipv6_pos3,sipv6_pos4,"
-                + "sipv6_pos5,sipv6_pos6,sipv6_pos7,sipv6_pos8,"
-                + "dipv4_pos1,dipv4_pos2,dipv4_pos3,dipv4_pos4,"
-                + "dipv6_pos1,dipv6_pos2,dipv6_pos3,dipv6_pos4,"
-                + "dipv6_pos5,dipv6_pos6,dipv6_pos7,dipv6_pos8\n"
-            )
-            processed_file.write(header)
-        processed_file.close()
+        header = features.read()[:-1]
     features.close()
+
+    # Source and destination IP addresses extra features
+    header = (
+        header
+        + ","
+        + "sipv4_pos1,sipv4_pos2,sipv4_pos3,sipv4_pos4,"
+        + "sipv6_pos1,sipv6_pos2,sipv6_pos3,sipv6_pos4,"
+        + "sipv6_pos5,sipv6_pos6,sipv6_pos7,sipv6_pos8,"
+        + "dipv4_pos1,dipv4_pos2,dipv4_pos3,dipv4_pos4,"
+        + "dipv6_pos1,dipv6_pos2,dipv6_pos3,dipv6_pos4,"
+        + "dipv6_pos5,dipv6_pos6,dipv6_pos7,dipv6_pos8\n"
+    )
+
+    with open(file, "w", encoding="utf-8") as processed_file:
+        processed_file.write(header)
+    processed_file.close()
 
 
 def create_processed_file(percentage: str) -> None:
@@ -126,15 +129,15 @@ def create_processed_file(percentage: str) -> None:
 
     filepath = os.path.join(csv_path, "botiot-" + percentage + ".csv")
 
-    with open(filepath, "w", newline="", encoding="utf-8") as processed_file:
-        add_header(filepath)
+    add_header(filepath)
 
+    with open(filepath, "a", newline="", encoding="utf-8") as processed_file:
         spamwriter = csv.writer(
             processed_file, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL
         )
 
         # Reads each one of the files from the original dataset
-        for i in range(1, 75):
+        for i in tqdm(range(1, 75)):
             original_file = os.path.join(
                 DATASET_FOLDER,
                 DATASET_FILE_PREFIX + str(i) + ".csv",
@@ -251,6 +254,8 @@ info_path = os.path.join(args.folder, "INFO")
 
 create_folders()
 
+print("Process started...")
+
 if not args.percentage is None:
     create_processed_file(str(args.percentage))
 elif not args.start is None and not args.finish is None and args.interval:
@@ -263,9 +268,6 @@ elif not args.start is None and not args.finish is None and args.interval:
 
     print(f"Percentages considered: {percentages}\n")
 
-    print("Process started...")
+    p_map(create_processed_file, percentages)
 
-    with Pool(len(percentages)) as pool:
-        pool.map(create_processed_file, percentages)
-
-    print("...Process finished")
+print("...Process finished")
