@@ -1,27 +1,3 @@
-###################################################################
-#                                                                 #
-# Project      : IoT DDoS Detection Based on Ensemble Methods for #
-#                Evolving Data Stream Classification              #
-#                                                                 #
-# Program name : advanced_processing_with_feature_selection.py    #
-#                                                                 #
-# Authors      : Kétly Gonçalves Machado, Daniel Macêdo Batista   #
-#                                                                 #
-# Purpose      : Performs an advanced processing of the CSV files #
-#                inside the folder passed through parameter       #
-#                "-folder" to treat and remove features, aiming   #
-#                to produce ARFF files that will be used to       #
-#                perform the experiments at Massive Online        #
-#                Analysis (MOA)                                   #
-#                                                                 #
-#                This advanced processing is performed            #
-#                considering the results obtained through the     #
-#                Exploratory Data Analysis (EDA) of the BoT-IoT   #
-#                dataset and, therefore, only includes the        #
-#                features that best represent the data            #
-#                                                                 #
-###################################################################
-
 import csv
 import os
 from tqdm import tqdm
@@ -38,23 +14,14 @@ HEADER = [
 ]
 
 
-def create_folder() -> None:
-    """Function creates the destination folder."""
-    try:
-        if not os.path.exists(arff_folder_path):
-            os.makedirs(arff_folder_path)
-    except OSError as e:
-        raise OSError("Error while creating destination folder") from e
-
-
 class ArgumentParser(Tap):
-    """Class defines arguments typing."""
+    """Class defines arguments typing"""
 
     folder: str  # folder with CSV files to process and where ARFF files will be stored
 
 
 def parse() -> ArgumentParser:
-    """Function parses arguments."""
+    """Function parses arguments"""
 
     parser = ArgumentParser(
         description="Advanced Processing",
@@ -68,56 +35,60 @@ def parse() -> ArgumentParser:
     return arguments
 
 
-args = parse()
+def execute(folder):
+    """Function processes subset features, performs feature selection and generates ARFF files"""
 
-csv_folder_path = os.path.join(args.folder, "CSV")
-arff_folder_path = os.path.join(args.folder, "ARFF-FS")
+    csv_files = []
 
-create_folder()
+    for subfolder in os.listdir(folder):
+        for file in os.listdir(os.path.join(folder, subfolder)):
+            file_path = os.path.join(folder, subfolder, file)
+            if os.path.isfile(file_path) and file_path.endswith(".csv"):
+                csv_files.append(file_path)
 
-csv_files = [
-    file
-    for file in os.listdir(csv_folder_path)
-    if os.path.isfile(os.path.join(csv_folder_path, file))
-]
+    print("\nAdvanced processing with feature selection started...\n")
 
-print("Process started...")
+    for csv_filename in tqdm(csv_files):
+        with open(csv_filename, encoding="utf-8") as csv_file:
+            reader = csv.reader(csv_file, delimiter=",")
 
-for csv_filename in tqdm(csv_files):
-
-    csv_path = os.path.join(csv_folder_path, csv_filename)
-
-    with open(csv_path, encoding="utf-8") as csv_file:
-        reader = csv.reader(csv_file, delimiter=",")
-
-        arff_path = os.path.join(arff_folder_path, csv_filename[:-3] + "arff")
-
-        with open(arff_path, "w", newline="", encoding="utf-8") as arff_file:
-            writer = csv.writer(
-                arff_file, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL
+            arff_filename = os.path.join(
+                os.path.dirname(csv_filename),
+                os.path.splitext(os.path.basename(csv_filename))[0] + ".arff",
             )
 
-            IS_FIRST_ROW = True
+            with open(arff_filename, "w", newline="", encoding="utf-8") as arff_file:
+                writer = csv.writer(
+                    arff_file, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL
+                )
 
-            for row in reader:
-                if IS_FIRST_ROW:
-                    # Ignores CSV header and adjusts ARFF header for feature treatment
-                    arff_file.writelines(HEADER)
-                    IS_FIRST_ROW = False
-                else:
-                    # Creates the instance with the final features/data
-                    instance = [
-                        row[COLUMNS["sipv4_pos4"]],
-                        # Creates the feature CON as a dummy from the feature state
-                        (1 if row[COLUMNS["state"]] == "CON" else 0),
-                        # Establishes the label as the only categorical feature
-                        # since this is required by some of the algorithms used in MOA
-                        ("attack" if int(row[COLUMNS["label"]]) == 1 else "normal"),
-                    ]
+                is_first_row = True
 
-                    writer.writerow(instance)
+                for row in reader:
+                    if is_first_row:
+                        # Ignores CSV header and adjusts ARFF header for feature treatment
+                        arff_file.writelines(HEADER)
+                        is_first_row = False
+                    else:
+                        # Creates the instance with the final features/data
+                        instance = [
+                            row[COLUMNS["sipv4_pos4"]],
+                            # Creates the feature CON as a dummy from the feature state
+                            (1 if row[COLUMNS["state"]] == "CON" else 0),
+                            # Establishes the label as the only categorical feature
+                            # since this is required by some of the algorithms used in MOA
+                            ("attack" if int(row[COLUMNS["label"]]) == 1 else "normal"),
+                        ]
 
-        arff_file.close()
-    csv_file.close()
+                        writer.writerow(instance)
 
-print("...Process finished")
+                arff_file.close()
+            csv_file.close()
+
+    print("\n...Advanced processing with feature selection finished\n")
+
+
+if __name__ == "__main__":
+    args = parse()
+
+    execute(args.folder)

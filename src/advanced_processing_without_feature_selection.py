@@ -1,21 +1,3 @@
-###################################################################
-#                                                                 #
-# Project      : IoT DDoS Detection Based on Ensemble Methods for #
-#                Evolving Data Stream Classification              #
-#                                                                 #
-# Program name : advanced_processing_without_feature_selection.py #
-#                                                                 #
-# Authors      : Kétly Gonçalves Machado, Daniel Macêdo Batista   #
-#                                                                 #
-# Purpose      : Performs an advanced processing of the CSV files #
-#                inside the folder passed through parameter       #
-#                "-folder" to treat and remove features, and also #
-#                deal with null values, aiming to produce ARFF    #
-#                files that will be used to perform the           #
-#                experiments at Massive Online Analysis (MOA)     #
-#                                                                 #
-###################################################################
-
 import csv
 import os
 from enum import IntEnum
@@ -74,7 +56,6 @@ class DummieFeatures(IntEnum):
 
 
 LABEL_FEATURE = 32
-
 
 HEADER = [
     "@relation botiot\n",
@@ -164,8 +145,28 @@ HEADER = [
 ]
 
 
-def replace_by_int(feature: str) -> int:
-    """Assures that feature is an integer."""
+class ArgumentParser(Tap):
+    """Class defines arguments typing"""
+
+    folder: str  # folder with CSV files to process and where ARFF files will be stored
+
+
+def parse() -> ArgumentParser:
+    """Function parses arguments"""
+
+    parser = ArgumentParser(
+        description="Advanced Processing",
+        usage="""This program can be used to perform advanced processing
+        to CSV files containing BoT-IoT subsets, tranforming them into ARFF files.""",
+    )
+
+    arguments = parser.parse_args()
+
+    return arguments
+
+
+def replace_by_int(feature):
+    """Assures that feature is an integer"""
     if feature == "":
         return -1
 
@@ -175,16 +176,16 @@ def replace_by_int(feature: str) -> int:
     return int(feature)
 
 
-def replace_by_number(feature: str) -> float:
-    """Assures that feature is a number."""
+def replace_by_number(feature):
+    """Assures that feature is a number"""
     if feature == "":
         return -1
 
     return float(feature)
 
 
-def get_dummies(feature_value: str, feature_idx: DummieFeatures) -> "list[int]":
-    """Replace feature by its dummies using one-hot encoding."""
+def get_dummies(feature_value, feature_idx):
+    """Replace feature by its dummies using one-hot encoding"""
 
     if feature_idx == DummieFeatures.FLGS:
         return [
@@ -226,98 +227,79 @@ def get_dummies(feature_value: str, feature_idx: DummieFeatures) -> "list[int]":
     raise TypeError("Feature name is invalid")
 
 
-def create_folder() -> None:
-    """Function creates the destination folder."""
-    try:
-        if not os.path.exists(arff_folder_path):
-            os.makedirs(arff_folder_path)
-    except OSError as e:
-        raise OSError("Error while creating destination folder") from e
+def get_processed_instance(row):
+    """Function processes data and returns the adjusted instance"""
+    # Creates the instance with the final features/data. Main changes:
+    # - Checks for null values and replaces it by -1
+    # - Replaces flgs, proto and state by its dummies using one-hot encoding
+    # - Removes saddr and daddr, that were already converted to 24 new features
+    # - Removes category and subcategory since they will not be considered
+    instance = []
+
+    for idx, col in enumerate(row):
+        if idx in iter(IntegerFeatures):
+            instance.append(replace_by_int(col))
+        elif idx in iter(NumberFeatures):
+            instance.append(replace_by_number(col))
+        elif idx in iter(DummieFeatures):
+            instance = instance + get_dummies(col, idx)
+        elif idx == LABEL_FEATURE:
+            # Establishes the label as the only categorical feature
+            # since this is required by some of the algorithms used in MOA
+            label = "attack" if int(col) == 1 else "normal"
+        elif idx not in iter(RemovalFeatures):
+            instance.append(col)
+
+    # label must be the last feature
+    instance.append(label)
+
+    return instance
 
 
-class ArgumentParser(Tap):
-    """Class defines arguments typing."""
+def execute(folder):
+    """Function further processes subset features and generates ARFF files"""
 
-    folder: str  # folder with CSV files to process and where ARFF files will be stored
+    csv_files = []
 
+    for subfolder in os.listdir(folder):
+        for file in os.listdir(os.path.join(folder, subfolder)):
+            file_path = os.path.join(folder, subfolder, file)
+            if os.path.isfile(file_path) and file_path.endswith(".csv"):
+                csv_files.append(file_path)
 
-def parse() -> ArgumentParser:
-    """Function parses arguments."""
+    print("\nAdvanced processing without feature selection started...\n")
 
-    parser = ArgumentParser(
-        description="Advanced Processing",
-        usage="""This program can be used to perform advanced processing
-        to CSV files containing BoT-IoT subsets, tranforming them into ARFF files.""",
-    )
+    for csv_filename in tqdm(csv_files):
+        with open(csv_filename, encoding="utf-8") as csv_file:
+            reader = csv.reader(csv_file, delimiter=",")
 
-    arguments = parser.parse_args()
-
-    return arguments
-
-
-args = parse()
-
-csv_folder_path = os.path.join(args.folder, "CSV")
-arff_folder_path = os.path.join(args.folder, "ARFF")
-
-create_folder()
-
-csv_files = [
-    file
-    for file in os.listdir(csv_folder_path)
-    if os.path.isfile(os.path.join(csv_folder_path, file))
-]
-
-print("Process started...")
-
-for csv_filename in tqdm(csv_files):
-
-    csv_path = os.path.join(csv_folder_path, csv_filename)
-
-    with open(csv_path, encoding="utf-8") as csv_file:
-        reader = csv.reader(csv_file, delimiter=",")
-
-        arff_path = os.path.join(arff_folder_path, csv_filename[:-3] + "arff")
-
-        with open(arff_path, "w", newline="", encoding="utf-8") as arff_file:
-            writer = csv.writer(
-                arff_file, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL
+            arff_filename = os.path.join(
+                os.path.dirname(csv_filename),
+                os.path.splitext(os.path.basename(csv_filename))[0] + ".arff",
             )
 
-            IS_FIRST_ROW = True
+            with open(arff_filename, "w", newline="", encoding="utf-8") as arff_file:
+                writer = csv.writer(
+                    arff_file, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL
+                )
 
-            for row in reader:
-                if IS_FIRST_ROW:
-                    # Ignores CSV header and adjusts ARFF header for feature treatment
-                    arff_file.writelines(HEADER)
-                    IS_FIRST_ROW = False
-                else:
-                    # Creates the instance with the final features/data. Main changes:
-                    # - Checks for null values and replaces it by -1
-                    # - Replaces flgs, proto and state by its dummies using one-hot encoding
-                    # - Removes saddr and daddr, that were already converted to 24 new features
-                    # - Removes category and subcategory since they will not be considered
-                    instance = []
+                is_first_row = True
 
-                    for idx, col in enumerate(row):
-                        if idx in iter(IntegerFeatures):
-                            instance.append(replace_by_int(col))
-                        elif idx in iter(NumberFeatures):
-                            instance.append(replace_by_number(col))
-                        elif idx in iter(DummieFeatures):
-                            instance = instance + get_dummies(col, idx)
-                        elif idx == LABEL_FEATURE:
-                            # Establishes the label as the only categorical feature
-                            # since this is required by some of the algorithms used in MOA
-                            LABEL = "attack" if int(col) == 1 else "normal"
-                        elif idx not in iter(RemovalFeatures):
-                            instance.append(col)
+                for row in reader:
+                    if is_first_row:
+                        # Ignores CSV header and adjusts ARFF header for feature treatment
+                        arff_file.writelines(HEADER)
+                        is_first_row = False
+                    else:
+                        writer.writerow(get_processed_instance(row))
 
-                    # label must be the last feature
-                    instance.append(LABEL)
-                    writer.writerow(instance)
+            arff_file.close()
+        csv_file.close()
 
-        arff_file.close()
-    csv_file.close()
+    print("\n...Advanced processing without feature selection finished\n")
 
-print("...Process finished")
+
+if __name__ == "__main__":
+    args = parse()
+
+    execute(args.folder)
