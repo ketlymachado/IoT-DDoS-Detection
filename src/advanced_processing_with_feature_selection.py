@@ -35,6 +35,52 @@ def parse() -> ArgumentParser:
     return arguments
 
 
+def compute_instances(csv_filename):
+    """Function computes instances, min values and max values"""
+    instances = []
+    min_values = []
+    max_values = []
+    is_first_iteration = True
+
+    with open(csv_filename, encoding="utf-8") as csv_file:
+        reader = csv.reader(csv_file, delimiter=",")
+
+        is_first_row = True
+
+        for row in reader:
+            if is_first_row:
+                is_first_row = False
+                continue
+
+            instance = [
+                int(row[COLUMNS["sipv4_pos4"]]),
+                # Creates the feature CON as a dummy from the feature state
+                (1 if row[COLUMNS["state"]] == "CON" else 0),
+                # Establishes the label as the only categorical feature
+                # since this is required by some of the algorithms used in MOA
+                ("attack" if int(row[COLUMNS["label"]]) == 1 else "normal"),
+            ]
+
+            instances.append(instance)
+
+            for idx, value in enumerate(instance):
+                is_last_column = idx == len(instance) - 1
+                if is_last_column:
+                    continue
+                if is_first_iteration:
+                    min_values.append(value)
+                    max_values.append(value)
+                else:
+                    min_values[idx] = min(min_values[idx], value)
+                    max_values[idx] = max(max_values[idx], value)
+
+            is_first_iteration = False
+
+    csv_file.close()
+
+    return instances, min_values, max_values
+
+
 def execute(folder):
     """Function processes subset features, performs feature selection and generates ARFF files"""
 
@@ -49,41 +95,35 @@ def execute(folder):
     print("\nAdvanced processing with feature selection started...\n")
 
     for csv_filename in tqdm(csv_files):
-        with open(csv_filename, encoding="utf-8") as csv_file:
-            reader = csv.reader(csv_file, delimiter=",")
+        instances, min_values, max_values = compute_instances(csv_filename)
 
-            arff_filename = os.path.join(
-                os.path.dirname(csv_filename),
-                os.path.splitext(os.path.basename(csv_filename))[0] + ".arff",
+        arff_filename = os.path.join(
+            os.path.dirname(csv_filename),
+            os.path.splitext(os.path.basename(csv_filename))[0] + ".arff",
+        )
+
+        with open(arff_filename, "w", newline="", encoding="utf-8") as arff_file:
+            writer = csv.writer(
+                arff_file, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL
             )
 
-            with open(arff_filename, "w", newline="", encoding="utf-8") as arff_file:
-                writer = csv.writer(
-                    arff_file, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL
-                )
+            arff_file.writelines(HEADER)
 
-                is_first_row = True
+            for instance in instances:
+                # Normalizes features by MIN-MAX scaling
+                for idx, _value in enumerate(instance):
+                    is_last_column = idx == len(instance) - 1
+                    if is_last_column:
+                        continue
+                    instance[idx] = (
+                        0
+                        if ((max_values[idx] - min_values[idx]) == 0)
+                        else (instance[idx] - min_values[idx])
+                        / (max_values[idx] - min_values[idx])
+                    )
+                writer.writerow(instance)
 
-                for row in reader:
-                    if is_first_row:
-                        # Ignores CSV header and adjusts ARFF header for feature treatment
-                        arff_file.writelines(HEADER)
-                        is_first_row = False
-                    else:
-                        # Creates the instance with the final features/data
-                        instance = [
-                            row[COLUMNS["sipv4_pos4"]],
-                            # Creates the feature CON as a dummy from the feature state
-                            (1 if row[COLUMNS["state"]] == "CON" else 0),
-                            # Establishes the label as the only categorical feature
-                            # since this is required by some of the algorithms used in MOA
-                            ("attack" if int(row[COLUMNS["label"]]) == 1 else "normal"),
-                        ]
-
-                        writer.writerow(instance)
-
-                arff_file.close()
-            csv_file.close()
+        arff_file.close()
 
     print("\n...Advanced processing with feature selection finished\n")
 

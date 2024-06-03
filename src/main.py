@@ -9,6 +9,8 @@ import advanced_processing_with_feature_selection
 import advanced_processing_without_feature_selection
 import data_balancing
 import shuffle_data
+import perform_ensemble_experiments
+import plot_results
 
 
 def validate_identifier(_answers, current):
@@ -158,3 +160,7 @@ if answers["data_balancing"]:
 
 if answers["shuffle"]:
     shuffle_data.execute(folder)
+
+perform_ensemble_experiments.execute(folder)
+
+plot_results.execute(answers["identifier"], answers["plot_language"])

@@ -218,8 +218,8 @@ def create_processed_file(data):
                             spamwriter.writerow(instance)
                             count_ddos = count_ddos + 1
 
-                subset_file.close()
-        processed_file.close()
+            subset_file.close()
+    processed_file.close()
 
     create_info_file(
         os.path.join(folder_name, "botiot-subset-info.txt"),

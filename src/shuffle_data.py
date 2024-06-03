@@ -56,8 +56,6 @@ def execute(folder):
 
         random.shuffle(instances)
 
-        os.rename(filename, filename + ".old")
-
         with open(filename, "w", newline="", encoding="utf-8") as shuffled_file:
             shuffled_file.writelines(header)
             shuffled_file.writelines(instances)

@@ -248,12 +248,50 @@ def get_processed_instance(row):
             # since this is required by some of the algorithms used in MOA
             label = "attack" if int(col) == 1 else "normal"
         elif idx not in iter(RemovalFeatures):
-            instance.append(col)
+            instance.append(float(col))
 
     # label must be the last feature
     instance.append(label)
 
     return instance
+
+
+def compute_instances(csv_filename):
+    """Function computes instances, min values and max values"""
+    instances = []
+    min_values = []
+    max_values = []
+    is_first_iteration = True
+
+    with open(csv_filename, encoding="utf-8") as csv_file:
+        reader = csv.reader(csv_file, delimiter=",")
+
+        is_first_row = True
+
+        for row in reader:
+            if is_first_row:
+                is_first_row = False
+                continue
+
+            instance = get_processed_instance(row)
+            instances.append(instance)
+
+            for idx, value in enumerate(instance):
+                is_last_column = idx == len(instance) - 1
+                if is_last_column:
+                    continue
+                if is_first_iteration:
+                    min_values.append(float(value))
+                    max_values.append(float(value))
+                else:
+                    min_values[idx] = min(min_values[idx], float(value))
+                    max_values[idx] = max(max_values[idx], float(value))
+
+            is_first_iteration = False
+
+    csv_file.close()
+
+    return instances, min_values, max_values
 
 
 def execute(folder):
@@ -270,31 +308,35 @@ def execute(folder):
     print("\nAdvanced processing without feature selection started...\n")
 
     for csv_filename in tqdm(csv_files):
-        with open(csv_filename, encoding="utf-8") as csv_file:
-            reader = csv.reader(csv_file, delimiter=",")
+        instances, min_values, max_values = compute_instances(csv_filename)
 
-            arff_filename = os.path.join(
-                os.path.dirname(csv_filename),
-                os.path.splitext(os.path.basename(csv_filename))[0] + ".arff",
+        arff_filename = os.path.join(
+            os.path.dirname(csv_filename),
+            os.path.splitext(os.path.basename(csv_filename))[0] + ".arff",
+        )
+
+        with open(arff_filename, "w", newline="", encoding="utf-8") as arff_file:
+            writer = csv.writer(
+                arff_file, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL
             )
 
-            with open(arff_filename, "w", newline="", encoding="utf-8") as arff_file:
-                writer = csv.writer(
-                    arff_file, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL
-                )
+            arff_file.writelines(HEADER)
 
-                is_first_row = True
+            for instance in instances:
+                # Normalizes features by MIN-MAX scaling
+                for idx, _value in enumerate(instance):
+                    is_last_column = idx == len(instance) - 1
+                    if is_last_column:
+                        continue
+                    instance[idx] = (
+                        0
+                        if ((max_values[idx] - min_values[idx]) == 0)
+                        else (instance[idx] - min_values[idx])
+                        / (max_values[idx] - min_values[idx])
+                    )
+                writer.writerow(instance)
 
-                for row in reader:
-                    if is_first_row:
-                        # Ignores CSV header and adjusts ARFF header for feature treatment
-                        arff_file.writelines(HEADER)
-                        is_first_row = False
-                    else:
-                        writer.writerow(get_processed_instance(row))
-
-            arff_file.close()
-        csv_file.close()
+        arff_file.close()
 
     print("\n...Advanced processing without feature selection finished\n")
 

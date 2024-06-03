@@ -1,7 +1,8 @@
 import csv
-from random import sample
+from random import choice, random
 import os
-import numpy as np
+from math import ceil, floor
+from sklearn.neighbors import NearestNeighbors
 from tqdm import tqdm
 from tap import Tap
 
@@ -47,102 +48,114 @@ def create_info_file(filename, normal_instances, attack_instances):
     balanced_info_file.close()
 
 
-def create_balanced_file(filename, header, instances, included):
+def create_balanced_file(filename, header, instances, systhetic_instances):
     """Function creates the balanced data file"""
 
     os.rename(filename, filename + ".old")
 
     with open(filename, "w", newline="", encoding="utf-8") as balanced_file:
-        writer = csv.writer(
-            balanced_file,
-            delimiter=",",
-            quotechar='"',
-            quoting=csv.QUOTE_MINIMAL,
+        balanced_file.writelines(header)
+        balanced_file.writelines(
+            "\n".join([",".join(instance) for instance in instances]) + "\n"
+        )
+        balanced_file.writelines(
+            "\n".join([",".join(instance) for instance in systhetic_instances]) + "\n"
         )
 
-        balanced_file.writelines(header)
-
-        instances_size = len(instances)
-        count_ddos = 0
-        count_normal = 0
-
-        for i in range(0, instances_size):
-            if included[i]:
-                instance = instances[i][:-1]
-                writer.writerow(instance)
-
-                if instance[-1] == "attack":
-                    count_ddos = count_ddos + 1
-                else:
-                    count_normal = count_normal + 1
-
-        balanced_file.close()
-
-    return count_normal, count_ddos
+    balanced_file.close()
 
 
-def random_oversampling(minority, majority_size, instances, included):
-    """Function performs random oversampling."""
-    minority_size = len(minority)
-    number_of_instances_to_include = int(majority_size * 0.35)
-
-    sorted_instances_to_include = np.random.choice(
-        range(0, minority_size), size=number_of_instances_to_include, replace=True
+def nearest_neighbour(x):
+    """Function calculates nearest neighbours"""
+    nbs = NearestNeighbors(n_neighbors=5, metric="euclidean", algorithm="kd_tree").fit(
+        x
     )
-
-    for sorted_idx in sorted_instances_to_include:
-        instances.append(minority[sorted_idx])
-        included.append(True)
+    _euclidean, indices = nbs.kneighbors(x)
+    return indices
 
 
-def random_undersampling(majority, included):
-    """Function performs random undersampling."""
-    majority_size = len(majority)
-    number_of_instances_to_remove = int(majority_size * 0.3)
+def populate(smote_amount, idx, neighbours, minority_class, number_of_columns):
+    """Function to generate the synthetic samples"""
+    synthetic_instances = []
+    while smote_amount > 0:
+        neighbour = choice(neighbours)
+        synthetic_instances.append([])
+        for column_idx in range(number_of_columns):
+            dif = (
+                minority_class[neighbour][column_idx] - minority_class[idx][column_idx]
+            )
+            gap = random()
+            synthetic_instances[-1].append(
+                str(minority_class[idx][column_idx] + gap * dif)
+            )
+        smote_amount = smote_amount - 1
 
-    sorted_instances_to_remove = sample(
-        range(0, majority_size), number_of_instances_to_remove
+    return synthetic_instances
+
+
+def smote(minority_class, smote_percentage, label):
+    """Function performs Synthetic Minority Over-sampling TEchnique"""
+    smote_amount = (
+        ceil(smote_percentage / 100)
+        if smote_percentage % 100 >= 50
+        else floor(smote_percentage / 100)
     )
+    number_of_columns = len(minority_class[0])
+    neighbour_indices = nearest_neighbour(minority_class)
+    synthetic_instances = []
 
-    for sorted_idx in sorted_instances_to_remove:
-        included[majority[sorted_idx][-1]] = False
+    for idx, neighbours in enumerate(neighbour_indices):
+        synthetic_instances.extend(
+            populate(
+                smote_amount,
+                idx,
+                neighbours,
+                minority_class,
+                number_of_columns,
+            )
+        )
+
+    for instance in synthetic_instances:
+        instance.append(label)
+
+    return synthetic_instances
 
 
 def initial_compute(filename):
     """Function initializes control variables and returns it"""
-    normal = []  # Stores the normal instances
-    attack = []  # Stores the attack instances
-    instances = []  # Stores all instances, including oversampling
-    included = []  # Binary list indicating if an instance is included
-    header = []  # ARFF header
+    normal = []
+    attack = []
+    instances = []
+    header = []
 
     with open(filename, encoding="utf-8") as file:
         reader = csv.reader(file, delimiter=",")
-
-        idx = 0
 
         for row in reader:
             if row[0][0] == "@":
                 header.append("".join(row) + "\n")
                 continue
 
-            if row[-1] == "attack":
-                attack.append(row)
-                attack[-1].append(idx)
-            else:
-                normal.append(row)
-                normal[-1].append(idx)
-
             instances.append(row)
-            included.append(True)
-            idx = idx + 1
-        file.close()
+            instance = []
 
-    return normal, attack, instances, included, header
+            for idx, value in enumerate(row):
+                is_last_column = idx == len(row) - 1
+                if is_last_column:
+                    continue
+                instance.append(float(value))
+
+            if row[-1] == "attack":
+                attack.append(instance)
+            else:
+                normal.append(instance)
+    file.close()
+
+    return normal, attack, instances, header
 
 
 def execute(folder):
-    """Function uses random over and under-sampling to balance class distribution"""
+    """Function uses SMOTE techinique to balance class distribution"""
 
     files = []
 
@@ -155,28 +168,31 @@ def execute(folder):
     print("\nData balancing started...\n")
 
     for filename in tqdm(files):
-        print("\nperforming initial computation...\n")
-        normal, attack, instances, included, header = initial_compute(filename)
+        normal, attack, instances, header = initial_compute(filename)
 
         minority_class = normal if len(attack) > len(normal) else attack
         majority_class = normal if len(normal) > len(attack) else attack
+        minority_class_label = "normal" if len(attack) > len(normal) else "attack"
+        scale = len(minority_class) / len(majority_class)
 
-        if (len(minority_class) / len(majority_class)) >= 0.5:
-            print("The minority class is at least 50% the size of the majority class")
-        else:
-            print("\nperforming oversampling...\n")
-            random_oversampling(
-                minority_class, len(majority_class), instances, included
+        if scale < 0.5:
+            synthetic_instances = smote(
+                minority_class, 100 / scale, minority_class_label
             )
-            print("\nperforming undersampling...\n")
-            random_undersampling(majority_class, included)
-
-        print("\ncreating balanced file...\n")
-        count_normal, count_ddos = create_balanced_file(
-            filename, header, instances, included
-        )
-
-        create_info_file(filename, count_normal, count_ddos)
+            create_balanced_file(filename, header, instances, synthetic_instances)
+            create_info_file(
+                filename,
+                (
+                    len(normal) + len(synthetic_instances)
+                    if minority_class_label == "normal"
+                    else len(normal)
+                ),
+                (
+                    len(attack) + len(synthetic_instances)
+                    if minority_class_label == "attack"
+                    else len(attack)
+                ),
+            )
 
     print("\n...Data balancing finished\n")
 

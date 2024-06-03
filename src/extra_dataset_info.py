@@ -1,19 +1,3 @@
-###################################################################
-#                                                                 #
-# Project      : IoT DDoS Detection Based on Ensemble Methods for #
-#                Evolving Data Stream Classification              #
-#                                                                 #
-# Program name : dataset-info.py                                  #
-#                                                                 #
-# Authors      : Kétly Gonçalves Machado, Daniel Macêdo Batista   #
-#                                                                 #
-# Purpose      : Prints information describing the total number   #
-#                of instances in the BoT-IoT, detailing the       #
-#                number of instances per class in each file that  #
-#                constitutes the dataset.                         #
-#                                                                 #
-###################################################################
-
 import csv
 
 COUNT_NORMAL = 0
