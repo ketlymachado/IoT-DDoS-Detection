@@ -1,7 +1,7 @@
 moa-release-2023.04.0/*
 !moa-release-2023.04.0/readme.md
-processed-data/*
-!processed-data/readme.md
+processed-data/ida-eda/10/*
+!processed-data/ida-eda/10/readme.md
 raw-data/*
 !raw-data/BoT-IoT/
 raw-data/BoT-IoT/*
