@@ -3,9 +3,8 @@ moa-release-2023.04.0/*
 processed-data/*
 !processed-data/readme.md
 raw-data/*
-!raw-data/readme.md
-results/plots/*
-!results/plots/readme.md
-results/moa/*
-!results/moa/readme.md
+!raw-data/BoT-IoT/
+raw-data/BoT-IoT/*
+!raw-data/BoT-IoT/readme.md
 weka-3-8-6
+!weka-3-8-6/readme.md
