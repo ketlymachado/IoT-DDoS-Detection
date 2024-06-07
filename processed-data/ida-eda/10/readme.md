@@ -1,4 +1,4 @@
-# IDA and EDA Subset
+# IDA and EDA subset
 
 To generate the subset used for IDA and EDA, use the following command, inside the src folder:
 
