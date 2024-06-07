@@ -237,7 +237,7 @@ def execute(folder, processing_type):
 
     csv_files = get_csv_files(folder)
 
-    print("\nAdvanced processing without feature selection started...\n")
+    print("\nAdvanced processing started...\n")
 
     for csv_filename in tqdm(csv_files):
         min_values, max_values = compute_instances(csv_filename, processing_type)
@@ -286,7 +286,7 @@ def execute(folder, processing_type):
             csv_file.close()
         arff_file.close()
 
-    print("\n...Advanced processing without feature selection finished\n")
+    print("\n...Advanced processing finished\n")
 
 
 if __name__ == "__main__":
