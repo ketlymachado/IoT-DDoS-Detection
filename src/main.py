@@ -5,8 +5,7 @@ import inquirer
 from inquirer import errors
 from inquirer.themes import GreenPassion
 import preprocessing
-import advanced_processing_with_feature_selection
-import advanced_processing_without_feature_selection
+import advanced_processing
 import data_balancing
 import shuffle_data
 import perform_ensemble_experiments
@@ -150,10 +149,17 @@ preprocessing.execute(
     start, finish, interval, int(additional_answers["decimals"]), folder
 )
 
+PROCESSING_TYPE = ""
+
 if answers["feature_selection"]:
-    advanced_processing_with_feature_selection.execute(folder)
+    if answers["data_balancing"]:
+        PROCESSING_TYPE = "balanced_fs"
+    else:
+        PROCESSING_TYPE = "unbalanced_fs"
 else:
-    advanced_processing_without_feature_selection.execute(folder)
+    PROCESSING_TYPE = "no_fs"
+
+advanced_processing.execute(folder, PROCESSING_TYPE)
 
 if answers["data_balancing"]:
     data_balancing.execute(folder)
