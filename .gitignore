@@ -4,6 +4,12 @@ moa-release-2023.04.0/*
 !moa-release-2023.04.0/readme.md
 processed-data/ida-eda/10/*
 !processed-data/ida-eda/10/readme.md
+processed-data/primary-experiment/10/*
+!processed-data/primary-experiment/10/readme.md
+processed-data/primary-experiment-fs-balanced-shuffled/10/*
+!processed-data/primary-experiment-fs-balanced-shuffled/10/readme.md
+processed-data/primary-experiment-shuffled/10/*
+!processed-data/primary-experiment-shuffled/10/readme.md
 raw-data/*
 !raw-data/BoT-IoT/
 raw-data/BoT-IoT/*
