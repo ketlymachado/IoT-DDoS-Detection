@@ -4,8 +4,8 @@ To generate the subset used for this experiment, use the following command, insi
 
 ```bash
 python src/main.py
-[?] Provide an identifier for this experiment (only lowercase and dashes allowed): primary-experiment-shuffled
-[?] Should feature selection be performed? (y/N): n
+[?] Provide an identifier for this experiment (only lowercase and dashes allowed): primary-experiment-fs-shuffled
+[?] Should feature selection be performed? (y/N): y
 [?] Should data balancing be performed? (y/N): n
 [?] Should data be shuffled? (y/N): y
 [?] In which language should data be plotted?: 
@@ -16,5 +16,4 @@ python src/main.py
  ❯ single
 [?] Provide the percentage for the experiments: 10
 [?] How many decimals would you like to use to present the percentage(s)?: 0
-
 ```

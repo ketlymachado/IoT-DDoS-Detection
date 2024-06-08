@@ -10,9 +10,17 @@ processed-data/primary-experiment-fs-balanced-shuffled/10/*
 !processed-data/primary-experiment-fs-balanced-shuffled/10/readme.md
 processed-data/primary-experiment-shuffled/10/*
 !processed-data/primary-experiment-shuffled/10/readme.md
+processed-data/primary-experiment-fs/10/*
+!processed-data/primary-experiment-fs/10/readme.md
+processed-data/primary-experiment-fs-balanced/10/*
+!processed-data/primary-experiment-fs-balanced/10/readme.md
+processed-data/primary-experiment-fs-shuffled/10/*
+!processed-data/primary-experiment-fs-shuffled/10/readme.md
 raw-data/*
 !raw-data/BoT-IoT/
 raw-data/BoT-IoT/*
 !raw-data/BoT-IoT/readme.md
 weka-3-8-6
 !weka-3-8-6/readme.md
+__pycache__
+.ipynb_checkpoints

@@ -1,4 +1,4 @@
-# Primary experiment subset
+# Experiment subset
 
 To generate the subset used for this experiment, use the following command, inside the src folder:
 
