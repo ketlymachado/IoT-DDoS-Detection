@@ -133,7 +133,8 @@ def get_unbalanced_feature_selection_instance(row):
 def get_balanced_feature_selection_instance(row):
     """Function returns instance with feature selection for balanced dataset"""
     return [
-        int(row[BoTIoTColumns.SIPV4_POS4]),
+        float(row[BoTIoTColumns.STIME]),
+        int(row[BoTIoTColumns.SEQ]),
         # Creates the feature CON as a dummy from the feature state
         (1 if row[BoTIoTColumns.STATE] == "CON" else 0),
         # Establishes the label as the only categorical feature

@@ -82,7 +82,8 @@ no_feature_selection_header = [
 
 balanced_feature_selection_header = [
     "@relation botiot\n",
-    "@attribute 'sipv4_pos4' numeric\n",
+    "@attribute 'stime' numeric\n",
+    "@attribute 'seq' numeric\n",
     "@attribute 'CON' numeric\n",
     "@attribute 'attack' {normal, attack}\n",
     "@data\n",
