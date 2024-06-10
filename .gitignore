@@ -16,6 +16,10 @@ processed-data/primary-experiment-fs-balanced/10/*
 !processed-data/primary-experiment-fs-balanced/10/readme.md
 processed-data/primary-experiment-fs-shuffled/10/*
 !processed-data/primary-experiment-fs-shuffled/10/readme.md
+processed-data/primary-experiment-balanced-shuffled/10/*
+!processed-data/primary-experiment-balanced-shuffled/10/readme.md
+processed-data/primary-experiment-balanced/10/*
+!processed-data/primary-experiment-balanced/10/readme.md
 raw-data/*
 !raw-data/BoT-IoT/
 raw-data/BoT-IoT/*
