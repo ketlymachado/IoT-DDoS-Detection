@@ -1,19 +1,18 @@
 import csv
 import os
 from pathlib import Path
-from p_tqdm import p_map
 from tqdm import tqdm
 from tap import Tap
 
 ensemble_algorithms = [
-    "ADACC",
-    "DWM",
-    "LEVBAG",
-    "OAUE",
-    "OZABAG",
-    "OZABAGADWIN",
-    "OZABAGASHT",
     "OZABOOST",
+    "OZABAGASHT",
+    "OZABAGADWIN",
+    "OZABAG",
+    "OAUE",
+    "LEVBAG",
+    "DWM",
+    "ADACC",
 ]
 
 ensemble_algorithms_config = {
@@ -76,7 +75,7 @@ def get_experiment_command(lines, algorithm, stream, output_file):
     )
 
     learner = ensemble_algorithms_config[algorithm]["learner"]
-    evaluator = "WindowClassificationPerformanceEvaluator"
+    evaluator = "(WindowClassificationPerformanceEvaluator -o -p -r -f)"
     sample_frequency = int(lines / 1000)
 
     return (
@@ -84,7 +83,7 @@ def get_experiment_command(lines, algorithm, stream, output_file):
         f'-javaagent:{os.path.join(moa_path, "sizeofag-1.0.4.jar")} '
         f'moa.DoTask "EvaluateInterleavedTestThenTrain -l {learner} -s '
         f'(ArffFileStream -f {stream}) -e {evaluator} -f {str(sample_frequency)}"'
-        f"> {output_file} 2> /dev/null"
+        f"2>&1 > {output_file}"
     )
 
 
@@ -142,10 +141,9 @@ def execute(folder):
         if not os.path.exists(experiment_subfolder):
             os.makedirs(experiment_subfolder)
 
-        experiments_data = []
-
-        for ensemble in ensemble_algorithms:
-            experiments_data.append(
+        for ensemble in tqdm(ensemble_algorithms):
+            print(f"\n## {ensemble} ##\n")
+            perform_experiment(
                 {
                     "algorithm": ensemble,
                     "data_file": filename,
@@ -155,8 +153,6 @@ def execute(folder):
                     ),
                 }
             )
-
-        p_map(perform_experiment, experiments_data)
 
     print("\n...Ensemble experiments finished\n")
 
