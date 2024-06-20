@@ -116,11 +116,11 @@ def plot(result_folder, plot_folder, language):
     plt.savefig(os.path.join(plot_folder, "accuracy-lineplot.pdf"), format="pdf")
 
     # Facetgrid
-    ax = sns.FacetGrid(data=melted_result, col="Ensemble", hue="Ensemble", col_wrap=2)
+    ax = sns.FacetGrid(data=melted_result, col="Ensemble", hue="Ensemble", col_wrap=4)
     ax.map(sns.lineplot, translator["xAxis"][language], translator["yAxis"][language])
 
     figure = plt.gcf()
-    figure.set_size_inches(12, 15)
+    figure.set_size_inches(12, 6)
     plt.tight_layout()
     plt.savefig(os.path.join(plot_folder, "accuracy-facetgrid.pdf"), format="pdf")
 
