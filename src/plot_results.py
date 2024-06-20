@@ -19,14 +19,14 @@ ensemble_algorithms = [
 ]
 
 ensemble_algorithms_config = {
-    "ADACC": {"name": "adacc"},
-    "DWM": {"name": "dwm"},
-    "LEVBAG": {"name": "lb"},
-    "OAUE": {"name": "oaue"},
-    "OZABAG": {"name": "ob"},
-    "OZABAGADWIN": {"name": "obadwin"},
-    "OZABAGASHT": {"name": "obasht"},
-    "OZABOOST": {"name": "obst"},
+    "ADACC": {"name": "adacc", "plotName": "ADACC"},
+    "DWM": {"name": "dwm", "plotName": "DWM"},
+    "LEVBAG": {"name": "lb", "plotName": "LevBag"},
+    "OAUE": {"name": "oaue", "plotName": "OAUE"},
+    "OZABAG": {"name": "ob", "plotName": "OzaBag"},
+    "OZABAGADWIN": {"name": "obadwin", "plotName": "OzaBagADWIN"},
+    "OZABAGASHT": {"name": "obasht", "plotName": "OzaBagASHT"},
+    "OZABOOST": {"name": "obst", "plotName": "OzaBoost"},
 }
 
 translator = {
@@ -76,7 +76,9 @@ def plot(result_folder, plot_folder, language):
         )
     )
     result = initial_ensemble[["classified instances"]]
-    result = result.rename(columns={"classified instances": translator["xAxis"][language]})
+    result = result.rename(
+        columns={"classified instances": translator["xAxis"][language]}
+    )
 
     for ensemble in ensemble_algorithms:
         algorithm = ensemble_algorithms_config[ensemble]["name"]
@@ -85,7 +87,9 @@ def plot(result_folder, plot_folder, language):
         accuracy_column = "classifications correct (percent)"
 
         result = pd.concat([result, ensemble_results[[accuracy_column]]], axis=1)
-        result = result.rename(columns={accuracy_column: algorithm})
+        result = result.rename(
+            columns={accuracy_column: ensemble_algorithms_config[ensemble]["plotName"]}
+        )
 
     # Adjusts the DataFrame to make it possible to plot all ensemble methods at once
     melted_result = result.melt(
@@ -95,17 +99,21 @@ def plot(result_folder, plot_folder, language):
     )
 
     # Lineplot
-    sns.lineplot(
+    ax = sns.lineplot(
         x=translator["xAxis"][language],
         y=translator["yAxis"][language],
         hue="Ensemble",
         data=melted_result,
     )
 
+    sns.move_legend(
+        ax, "lower center", bbox_to_anchor=(0.5, 1), ncol=4, title=None, frameon=False
+    )
+
     figure = plt.gcf()
     figure.set_size_inches(12, 6)
     plt.tight_layout()
-    plt.savefig(os.path.join(plot_folder, "lineplot.pdf"), format="pdf")
+    plt.savefig(os.path.join(plot_folder, "accuracy-lineplot.pdf"), format="pdf")
 
     # Facetgrid
     ax = sns.FacetGrid(data=melted_result, col="Ensemble", hue="Ensemble", col_wrap=2)
@@ -114,10 +122,13 @@ def plot(result_folder, plot_folder, language):
     figure = plt.gcf()
     figure.set_size_inches(12, 15)
     plt.tight_layout()
-    plt.savefig(os.path.join(plot_folder, "facetgrid.pdf"), format="pdf")
+    plt.savefig(os.path.join(plot_folder, "accuracy-facetgrid.pdf"), format="pdf")
 
     plt.clf()
     plt.close("all")
+
+    print("\n\n## accuracy ##")
+    print(result.drop(columns=[translator["xAxis"][language]]).mean().round(2))
 
 
 def execute(identifier, language):
