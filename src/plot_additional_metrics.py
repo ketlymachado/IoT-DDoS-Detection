@@ -7,6 +7,13 @@ from tap import Tap
 from tqdm import tqdm
 from typing_extensions import Literal
 
+metrics = {
+    "kappa": {"column": "Kappa Statistic (percent)"},
+    "f1-score": {"column": "F1 Score (percent)"},
+    "precision": {"column": "Precision (percent)"},
+    "recall": {"column": "Recall (percent)"},
+}
+
 ensemble_algorithms = [
     "ADACC",
     # "DWM",
@@ -31,7 +38,12 @@ ensemble_algorithms_config = {
 
 translator = {
     "xAxis": {"PT-BR": "Instâncias", "EN": "Instances"},
-    "yAxis": {"PT-BR": "Acurácia (%)", "EN": "Accuracy (%)"},
+    "yAxis": {
+        "kappa": {"PT-BR": "Coeficiente Kappa (%)", "EN": "Kappa Statistic (%)"},
+        "f1-score": {"PT-BR": "F1-score (%)", "EN": "F1 Score (%)"},
+        "precision": {"PT-BR": "Precisão (%)", "EN": "Precision (%)"},
+        "recall": {"PT-BR": "Recall (%)", "EN": "Recall (%)"},
+    },
 }
 
 
@@ -55,12 +67,8 @@ def parse() -> ArgumentParser:
     return arguments
 
 
-def plot(result_folder, plot_folder, language):
-    """Function plots result"""
-
-    if not os.path.exists(plot_folder):
-        os.makedirs(plot_folder)
-
+def plot_metric(result_folder, plot_folder, language, metric):
+    """Function plots metric result"""
     sns.set_theme(
         context="paper",
         style="darkgrid",
@@ -84,24 +92,28 @@ def plot(result_folder, plot_folder, language):
         algorithm = ensemble_algorithms_config[ensemble]["name"]
         ensemble_results = pd.read_csv(os.path.join(result_folder, algorithm + ".csv"))
 
-        accuracy_column = "classifications correct (percent)"
-
-        result = pd.concat([result, ensemble_results[[accuracy_column]]], axis=1)
+        result = pd.concat(
+            [result, ensemble_results[[metrics[metric]["column"]]]], axis=1
+        )
         result = result.rename(
-            columns={accuracy_column: ensemble_algorithms_config[ensemble]["plotName"]}
+            columns={
+                metrics[metric]["column"]: ensemble_algorithms_config[ensemble][
+                    "plotName"
+                ]
+            }
         )
 
     # Adjusts the DataFrame to make it possible to plot all ensemble methods at once
     melted_result = result.melt(
         translator["xAxis"][language],
         var_name="Ensemble",
-        value_name=translator["yAxis"][language],
+        value_name=translator["yAxis"][metric][language],
     )
 
     # Lineplot
     ax = sns.lineplot(
         x=translator["xAxis"][language],
-        y=translator["yAxis"][language],
+        y=translator["yAxis"][metric][language],
         hue="Ensemble",
         data=melted_result,
     )
@@ -113,22 +125,35 @@ def plot(result_folder, plot_folder, language):
     figure = plt.gcf()
     figure.set_size_inches(12, 6)
     plt.tight_layout()
-    plt.savefig(os.path.join(plot_folder, "accuracy-lineplot.pdf"), format="pdf")
+    plt.savefig(os.path.join(plot_folder, metric + "-lineplot.pdf"), format="pdf")
 
     # Facetgrid
-    ax = sns.FacetGrid(data=melted_result, col="Ensemble", hue="Ensemble", col_wrap=4)
-    ax.map(sns.lineplot, translator["xAxis"][language], translator["yAxis"][language])
+    ax = sns.FacetGrid(data=melted_result, col="Ensemble", hue="Ensemble", col_wrap=2)
+    ax.map(
+        sns.lineplot,
+        translator["xAxis"][language],
+        translator["yAxis"][metric][language],
+    )
 
     figure = plt.gcf()
-    figure.set_size_inches(12, 6)
+    figure.set_size_inches(12, 15)
     plt.tight_layout()
-    plt.savefig(os.path.join(plot_folder, "accuracy-facetgrid.pdf"), format="pdf")
+    plt.savefig(os.path.join(plot_folder, metric + "-facetgrid.pdf"), format="pdf")
 
     plt.clf()
     plt.close("all")
 
-    print("\n\n## accuracy ##")
+    print(f"\n\n## {metric} ##")
     print(result.drop(columns=[translator["xAxis"][language]]).mean().round(2))
+
+
+def plot(result_folder, plot_folder, language):
+    """Function plots result"""
+    if not os.path.exists(plot_folder):
+        os.makedirs(plot_folder)
+
+    for metric in metrics:
+        plot_metric(result_folder, plot_folder, language, metric)
 
 
 def execute(identifier, language):
