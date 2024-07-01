@@ -16,7 +16,7 @@ metrics = {
 
 ensemble_algorithms = [
     "ADACC",
-    # "DWM",
+    "DWM",
     "LEVBAG",
     "OAUE",
     "OZABAG",

@@ -9,7 +9,7 @@ from typing_extensions import Literal
 
 ensemble_algorithms = [
     "ADACC",
-    # "DWM",
+    "DWM",
     "LEVBAG",
     "OAUE",
     "OZABAG",
