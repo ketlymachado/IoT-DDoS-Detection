@@ -11,15 +11,15 @@ ensemble_algorithms = [
     "OZABAG",
     "OAUE",
     "LEVBAG",
-    # "DWM",
+    "DWM",
     "ADACC",
 ]
 
 ensemble_algorithms_config = {
     # Anticipative Dynamic Adaptation to Concept Changes
-    "ADACC": {"name": "adacc", "learner": "meta.ADACC"},
+    "ADACC": {"name": "adacc", "learner": "(meta.ADACC -n 10)"},
     # Dynamic Weighted Majority
-    "DWM": {"name": "dwm", "learner": "meta.DynamicWeightedMajority"},
+    "DWM": {"name": "dwm", "learner": "(meta.DynamicWeightedMajority -e 10)"},
     # Leveraging Bagging
     "LEVBAG": {"name": "lb", "learner": "meta.LeveragingBag"},
     # Online Accuracy Updated Ensemble
